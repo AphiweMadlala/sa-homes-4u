@@ -33,8 +33,8 @@
     <a href="contact.html">Contact</a>
   </div>
   <div class="nav-overlay__meta">
-    <a href="https://wa.me/27000000000?text=Hi%20SA%20Homes%204U%2C%20I'd%20like%20to%20enquire%20about%20a%20property." target="_blank" rel="noopener">WhatsApp: +27 00 000 0000</a>
-    <a href="mailto:info@sahomes4u.example">info@sahomes4u.example</a>
+    
+    
     <a href="https://www.instagram.com/sa_homes4u/" target="_blank" rel="noopener">@sa_homes4u on Instagram</a>
   </div>
 </div>
@@ -50,26 +50,16 @@
 <section class="section">
   <div class="container contact-grid">
     <div data-reveal>
-      <div class="contact-detail">
-        <dt>WhatsApp</dt>
-        <dd><a href="https://wa.me/27000000000?text=Hi%20SA%20Homes%204U%2C%20I'd%20like%20to%20enquire%20about%20a%20property." target="_blank" rel="noopener">+27 00 000 0000</a></dd>
-      </div>
-      <div class="contact-detail">
-        <dt>Phone</dt>
-        <dd><a href="tel:+27000000000">+27 00 000 0000</a></dd>
-      </div>
-      <div class="contact-detail">
-        <dt>Email</dt>
-        <dd><a href="mailto:info@sahomes4u.example">info@sahomes4u.example</a></dd>
-      </div>
+      
       <div class="contact-detail">
         <dt>Instagram</dt>
         <dd><a href="https://www.instagram.com/sa_homes4u/" target="_blank" rel="noopener">@sa_homes4u</a></dd>
       </div>
-      <a class="btn btn-gold" href="https://wa.me/27000000000?text=Hi%20SA%20Homes%204U%2C%20I'd%20like%20to%20enquire%20about%20a%20property." target="_blank" rel="noopener" style="margin-top:12px;"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.5 0-10 4.5-10 10 0 1.77.47 3.45 1.3 4.9L2 22l5.25-1.38a9.96 9.96 0 0 0 4.79 1.22h.01c5.5 0 10-4.5 10-10s-4.5-9.84-10.01-9.84Zm0 18.2a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.34c0-4.53 3.69-8.22 8.24-8.22 4.54 0 8.22 3.68 8.22 8.22 0 4.53-3.69 8.2-8.23 8.2Zm4.52-6.16c-.25-.12-1.47-.72-1.7-.8-.23-.08-.4-.12-.56.13-.17.25-.65.8-.8.96-.15.17-.29.19-.54.06-.25-.12-1.06-.39-2.02-1.24-.75-.66-1.25-1.48-1.4-1.73-.15-.25-.02-.38.11-.51.11-.11.25-.29.37-.44.12-.15.16-.25.25-.42.08-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.08s.9 2.41 1.02 2.58c.12.17 1.77 2.7 4.28 3.79.6.26 1.06.41 1.43.53.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.17-.48-.29Z"/></svg> Message on WhatsApp</a>
+      <p class="form-note">Our direct phone and email lines are being finalised &mdash; for now, the fastest way to reach us is Instagram.</p>
+      <a class="btn btn-accent" href="https://www.instagram.com/sa_homes4u/" target="_blank" rel="noopener" style="margin-top:12px;"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg> Message on Instagram</a>
     </div>
 
-    <form class="contact-form" onsubmit="return false;" data-reveal>
+    <form class="contact-form" data-role="contact-form" onsubmit="return false;" data-reveal>
       <div>
         <label for="cName">Full Name</label>
         <input id="cName" type="text" name="name" required>
@@ -87,6 +77,7 @@
         <textarea id="cMessage" name="message" required></textarea>
       </div>
       <button type="submit" class="btn btn-primary btn-block" id="contactSubmit">Send Enquiry <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
+      <p class="form-note" id="contactFormNote" hidden></p>
     </form>
   </div>
 </section>
@@ -96,19 +87,14 @@
     <div class="cta-band" style="border-top:none;">
       <div class="cta-band__row">
         <h2>Let's find<br>your next home.</h2>
-        <a class="btn btn-gold" href="https://wa.me/27000000000?text=Hi%20SA%20Homes%204U%2C%20I'd%20like%20to%20enquire%20about%20a%20property." target="_blank" rel="noopener"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.5 0-10 4.5-10 10 0 1.77.47 3.45 1.3 4.9L2 22l5.25-1.38a9.96 9.96 0 0 0 4.79 1.22h.01c5.5 0 10-4.5 10-10s-4.5-9.84-10.01-9.84Zm0 18.2a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.34c0-4.53 3.69-8.22 8.24-8.22 4.54 0 8.22 3.68 8.22 8.22 0 4.53-3.69 8.2-8.23 8.2Zm4.52-6.16c-.25-.12-1.47-.72-1.7-.8-.23-.08-.4-.12-.56.13-.17.25-.65.8-.8.96-.15.17-.29.19-.54.06-.25-.12-1.06-.39-2.02-1.24-.75-.66-1.25-1.48-1.4-1.73-.15-.25-.02-.38.11-.51.11-.11.25-.29.37-.44.12-.15.16-.25.25-.42.08-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.08s.9 2.41 1.02 2.58c.12.17 1.77 2.7 4.28 3.79.6.26 1.06.41 1.43.53.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.17-.48-.29Z"/></svg> Message on WhatsApp</a>
+        <a class="btn btn-accent" href="https://www.instagram.com/sa_homes4u/" target="_blank" rel="noopener"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg> Message on Instagram</a>
       </div>
     </div>
     <div class="footer-grid">
-      <div class="footer-col">
-        <h4>Address</h4>
-        <p>Address to be confirmed</p>
-        <p>South Africa</p>
-      </div>
+      
       <div class="footer-col">
         <h4>Contact</h4>
-        <a href="tel:+27000000000">+27 00 000 0000</a>
-        <a href="mailto:info@sahomes4u.example">info@sahomes4u.example</a>
+        <p>Reach us on Instagram for now.</p>
       </div>
       <div class="footer-col">
         <h4>Follow</h4>
@@ -137,7 +123,7 @@
   <button type="button" class="lightbox__next" id="lightboxNext" aria-label="Next image"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"/></svg></button>
   <div class="lightbox__count" id="lightboxCount"></div>
 </div>
-<script>window.__CONTACT_EMAIL__ = "info@sahomes4u.example";</script>
+<script>window.__CONTACT_EMAIL__ = null; window.__INSTAGRAM__ = "https://www.instagram.com/sa_homes4u/";</script>
 <script src="assets/js/main.js"></script>
 </body>
 </html>

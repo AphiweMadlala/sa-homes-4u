@@ -33,8 +33,8 @@
     <a href="contact.html">Contact</a>
   </div>
   <div class="nav-overlay__meta">
-    <a href="https://wa.me/27000000000?text=Hi%20SA%20Homes%204U%2C%20I'd%20like%20to%20enquire%20about%20a%20property." target="_blank" rel="noopener">WhatsApp: +27 00 000 0000</a>
-    <a href="mailto:info@sahomes4u.example">info@sahomes4u.example</a>
+    
+    
     <a href="https://www.instagram.com/sa_homes4u/" target="_blank" rel="noopener">@sa_homes4u on Instagram</a>
   </div>
 </div>
@@ -43,94 +43,91 @@
   <div class="container">
     <span class="eyebrow">The Collection</span>
     <h1>Every Home We Currently Represent</h1>
-    <p>Search the full collection by location, property type, bedrooms, and price.</p>
+    <p>Search the full collection by area, property type, bedrooms, and bathrooms — set your own price range, then sort by price or browse the latest additions.</p>
   </div>
 </section>
 
 <section class="section section--tight">
   <div class="container">
-    <div class="filter-bar" role="search" aria-label="Filter properties">
-      <div class="filter-field">
-        <label for="fLocation">Location</label>
-        <select id="fLocation">
-          <option value="">Any Location</option>
-          <option value="Bedfordview">Bedfordview</option>
-          <option value="Birdwood Estate, Hartbeespoort">Birdwood Estate, Hartbeespoort</option>
-          <option value="Blair Atholl Golf Estate, Centurion">Blair Atholl Golf Estate, Centurion</option>
-          <option value="Blue Hills Equestrian Estate, Midrand">Blue Hills Equestrian Estate, Midrand</option>
-          <option value="Boskloof Eco Estate, Somerset West">Boskloof Eco Estate, Somerset West</option>
-          <option value="Bryanston, Sandton">Bryanston, Sandton</option>
-          <option value="Cape Winelands, Franschhoek">Cape Winelands, Franschhoek</option>
-          <option value="Cotswold Downs Golf &amp; Country Estate, Hillcrest">Cotswold Downs Golf &amp; Country Estate, Hillcrest</option>
-          <option value="Dainfern Golf Estate, Sandton">Dainfern Golf Estate, Sandton</option>
-          <option value="Hawaan Forest Estate, uMhlanga">Hawaan Forest Estate, uMhlanga</option>
-          <option value="Hermanus, Western Cape">Hermanus, Western Cape</option>
-          <option value="Knysna, Western Cape">Knysna, Western Cape</option>
-          <option value="Morningside, Somerset West">Morningside, Somerset West</option>
-          <option value="Mount Richmore Village Estate, Ballito">Mount Richmore Village Estate, Ballito</option>
-          <option value="Ridgeside, uMhlanga">Ridgeside, uMhlanga</option>
-          <option value="Serengeti Lifestyle Estate, Kempton Park">Serengeti Lifestyle Estate, Kempton Park</option>
-          <option value="Spanish Farm, Somerset West">Spanish Farm, Somerset West</option>
-          <option value="Steyn City">Steyn City</option>
-          <option value="Suiderstrand, Western Cape">Suiderstrand, Western Cape</option>
-          <option value="The Hills Game Reserve, Pretoria">The Hills Game Reserve, Pretoria</option>
-          <option value="Val de Vie Estate, Paarl">Val de Vie Estate, Paarl</option>
-          <option value="Vygeboom, Durbanville">Vygeboom, Durbanville</option>
-          <option value="Waterfall Country Estate, Midrand">Waterfall Country Estate, Midrand</option>
-          <option value="Zimbali Estate, Ballito">Zimbali Estate, Ballito</option>
-          <option value="Zimbali Lakes Resort, Ballito">Zimbali Lakes Resort, Ballito</option>
-          <option value="Zululami Estate, KwaZulu Natal">Zululami Estate, KwaZulu Natal</option>
-        </select>
+    <form class="filter-bar" id="filterForm" role="search" aria-label="Filter properties">
+      <div class="filter-grid">
+        <div class="filter-field">
+          <label for="fArea">Area</label>
+          <select id="fArea">
+            <option value="">Any Area</option>
+            <option value="Ballito">Ballito</option>
+            <option value="Bedfordview">Bedfordview</option>
+            <option value="Centurion">Centurion</option>
+            <option value="Durbanville">Durbanville</option>
+            <option value="Franschhoek">Franschhoek</option>
+            <option value="Hartbeespoort">Hartbeespoort</option>
+            <option value="Hermanus">Hermanus</option>
+            <option value="Hillcrest">Hillcrest</option>
+            <option value="Kempton Park">Kempton Park</option>
+            <option value="Knysna">Knysna</option>
+            <option value="Midrand">Midrand</option>
+            <option value="Paarl">Paarl</option>
+            <option value="Pretoria">Pretoria</option>
+            <option value="Sandton">Sandton</option>
+            <option value="Sheffield Beach / North Coast">Sheffield Beach / North Coast</option>
+            <option value="Somerset West">Somerset West</option>
+            <option value="Suiderstrand">Suiderstrand</option>
+            <option value="uMhlanga">uMhlanga</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="fType">Property Type</label>
+          <select id="fType">
+            <option value="">Any Type</option>
+            <option value="House">House</option>
+            <option value="Apartment">Apartment</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="fBedrooms">Bedrooms</label>
+          <select id="fBedrooms">
+            <option value="">Any</option>
+            <option value="1">1+</option>
+            <option value="2">2+</option>
+            <option value="3">3+</option>
+            <option value="4">4+</option>
+            <option value="5">5+</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="fBathrooms">Bathrooms</label>
+          <select id="fBathrooms">
+            <option value="">Any</option>
+            <option value="1">1+</option>
+            <option value="2">2+</option>
+            <option value="3">3+</option>
+            <option value="4">4+</option>
+            <option value="5">5+</option>
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="fMin">Minimum Price</label>
+          <input type="text" inputmode="numeric" autocomplete="off" id="fMin" placeholder="e.g. R 7 500 000">
+        </div>
+        <div class="filter-field">
+          <label for="fMax">Maximum Price</label>
+          <input type="text" inputmode="numeric" autocomplete="off" id="fMax" placeholder="e.g. R 27 500 000">
+        </div>
+        <div class="filter-field">
+          <label for="fSort">Sort By</label>
+          <select id="fSort">
+            <option value="default">Default / Latest</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+          </select>
+        </div>
       </div>
-      <div class="filter-field">
-        <label for="fType">Property Type</label>
-        <select id="fType">
-          <option value="">Any Type</option>
-          <option value="House">House</option>
-        </select>
+      <p class="filter-error" id="priceError" role="alert" hidden>Minimum price can&rsquo;t be higher than maximum price.</p>
+      <div class="filter-actions">
+        <button type="submit" class="btn btn-primary filter-submit" id="filterSearch">Search Properties</button>
+        <button type="button" class="filter-reset" id="filterReset">Reset Filters</button>
       </div>
-      <div class="filter-field">
-        <label for="fBedrooms">Bedrooms</label>
-        <select id="fBedrooms">
-          <option value="">Any</option>
-          <option value="3">3+ Bedrooms</option>
-          <option value="4">4+ Bedrooms</option>
-          <option value="5">5+ Bedrooms</option>
-          <option value="6">6+ Bedrooms</option>
-          <option value="7">7+ Bedrooms</option>
-          <option value="8">8+ Bedrooms</option>
-        </select>
-      </div>
-      <div class="filter-field">
-        <label for="fMin">Minimum Price</label>
-        <select id="fMin">
-          <option value="">No Min</option>
-          <option value="5000000">R 5 000 000</option>
-          <option value="10000000">R 10 000 000</option>
-          <option value="15000000">R 15 000 000</option>
-          <option value="20000000">R 20 000 000</option>
-          <option value="25000000">R 25 000 000</option>
-          <option value="30000000">R 30 000 000</option>
-          <option value="40000000">R 40 000 000</option>
-          <option value="50000000">R 50 000 000</option>
-        </select>
-      </div>
-      <div class="filter-field">
-        <label for="fMax">Maximum Price</label>
-        <select id="fMax">
-          <option value="">No Max</option>
-          <option value="5000000">R 5 000 000</option>
-          <option value="10000000">R 10 000 000</option>
-          <option value="15000000">R 15 000 000</option>
-          <option value="20000000">R 20 000 000</option>
-          <option value="25000000">R 25 000 000</option>
-          <option value="30000000">R 30 000 000</option>
-          <option value="40000000">R 40 000 000</option>
-          <option value="50000000">R 50 000 000</option>
-        </select>
-      </div>
-      <button type="button" class="filter-reset" id="filterReset">Reset Filters</button>
-    </div>
+    </form>
 
     <div class="results-meta">
       <span id="resultsCount">Showing all 30 properties</span>
@@ -139,10 +136,10 @@
 
     <div class="p-grid" id="propertyGrid">
       <article class="p-card" data-filter-card
-    data-region="Centurion"
-    data-location="Blair Atholl Golf Estate, Centurion"
+    data-area="Centurion"
     data-type="House"
     data-bedrooms="5"
+    data-bathrooms="5"
     data-price="19000000"
     data-reveal>
   <a href="properties/5-bedroom-house-in-blair-atholl-golf-estate-centurion.html" aria-label="View 5 Bedroom House in Blair Atholl Golf Estate, Centurion">
@@ -160,10 +157,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Western Cape"
-    data-location="Suiderstrand, Western Cape"
+    data-area="Suiderstrand"
     data-type="House"
     data-bedrooms="5"
+    data-bathrooms="5"
     data-price="24900000"
     data-reveal>
   <a href="properties/5-bedroom-house-in-suiderstrand-western-cape.html" aria-label="View 5 Bedroom House in Suiderstrand, Western Cape">
@@ -181,10 +178,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Somerset West"
-    data-location="Morningside, Somerset West"
+    data-area="Somerset West"
     data-type="House"
     data-bedrooms="8"
+    data-bathrooms="8"
     data-price="27500000"
     data-reveal>
   <a href="properties/8-bedroom-house-in-morningside-somerset-west.html" aria-label="View 8 Bedroom House in Morningside, Somerset West">
@@ -202,10 +199,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Pretoria"
-    data-location="The Hills Game Reserve, Pretoria"
+    data-area="Pretoria"
     data-type="House"
     data-bedrooms="8"
+    data-bathrooms="8"
     data-price="10995000"
     data-reveal>
   <a href="properties/8-bedroom-house-in-the-hills-game-reserve-pretoria.html" aria-label="View 8 Bedroom House in The Hills Game Reserve, Pretoria">
@@ -223,10 +220,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="KwaZulu Natal"
-    data-location="Zululami Estate, KwaZulu Natal"
+    data-area="Sheffield Beach / North Coast"
     data-type="House"
     data-bedrooms="4"
+    data-bathrooms="4"
     data-price="18500000"
     data-reveal>
   <a href="properties/4-bedroom-house-in-zululami-estate-kwazulu-natal.html" aria-label="View 4 Bedroom House in Zululami Estate, KwaZulu Natal">
@@ -244,10 +241,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Steyn City"
-    data-location="Steyn City"
+    data-area="Midrand"
     data-type="House"
     data-bedrooms="4"
+    data-bathrooms="4"
     data-price="22999000"
     data-reveal>
   <a href="properties/4-bedroom-house-in-steyn-city.html" aria-label="View 4 Bedroom House in Steyn City">
@@ -265,10 +262,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Somerset West"
-    data-location="Boskloof Eco Estate, Somerset West"
+    data-area="Somerset West"
     data-type="House"
     data-bedrooms="5"
+    data-bathrooms="5"
     data-price="21000000"
     data-reveal>
   <a href="properties/5-bedroom-house-in-boskloof-eco-estate-somerset-west.html" aria-label="View 5 Bedroom House in Boskloof Eco Estate, Somerset West">
@@ -286,10 +283,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Western Cape"
-    data-location="Hermanus, Western Cape"
+    data-area="Hermanus"
     data-type="House"
     data-bedrooms="3"
+    data-bathrooms="3"
     data-price="22741000"
     data-reveal>
   <a href="properties/3-bedroom-house-in-hermanus-western-cape.html" aria-label="View 3 Bedroom House in Hermanus, Western Cape">
@@ -307,10 +304,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Midrand"
-    data-location="Blue Hills Equestrian Estate, Midrand"
+    data-area="Midrand"
     data-type="House"
     data-bedrooms="5"
+    data-bathrooms="5"
     data-price="39990000"
     data-reveal>
   <a href="properties/5-bedroom-house-in-blue-hills-equestrian-estate-midrand.html" aria-label="View 5 Bedroom House in Blue Hills Equestrian Estate, Midrand">
@@ -328,10 +325,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Franschhoek"
-    data-location="Cape Winelands, Franschhoek"
+    data-area="Franschhoek"
     data-type="House"
     data-bedrooms="5"
+    data-bathrooms="5"
     data-price="49995000"
     data-reveal>
   <a href="properties/5-bedroom-house-in-cape-winelands-franschhoek.html" aria-label="View 5 Bedroom House in Cape Winelands, Franschhoek">
@@ -349,10 +346,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Sandton"
-    data-location="Dainfern Golf Estate, Sandton"
+    data-area="Sandton"
     data-type="House"
     data-bedrooms="4"
+    data-bathrooms="4"
     data-price="19900000"
     data-reveal>
   <a href="properties/4-bedroom-house-in-dainfern-golf-estate-sandton.html" aria-label="View 4 Bedroom House in Dainfern Golf Estate, Sandton">
@@ -370,10 +367,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Western Cape"
-    data-location="Knysna, Western Cape"
+    data-area="Knysna"
     data-type="House"
     data-bedrooms="7"
+    data-bathrooms="7"
     data-price="25000000"
     data-reveal>
   <a href="properties/7-bedroom-house-in-knysna-western-cape.html" aria-label="View 7 Bedroom House in Knysna, Western Cape">
@@ -391,10 +388,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Hartbeespoort"
-    data-location="Birdwood Estate, Hartbeespoort"
+    data-area="Hartbeespoort"
     data-type="House"
     data-bedrooms="6"
+    data-bathrooms="6"
     data-price="31500000"
     data-reveal>
   <a href="properties/6-bedroom-house-in-birdwood-estate-hartbeespoort.html" aria-label="View 6 Bedroom House in Birdwood Estate, Hartbeespoort">
@@ -412,10 +409,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Ballito"
-    data-location="Zimbali Estate, Ballito"
+    data-area="Ballito"
     data-type="House"
     data-bedrooms="4"
+    data-bathrooms="4"
     data-price="32000000"
     data-reveal>
   <a href="properties/4-bedroom-house-in-zimbali-estate-ballito.html" aria-label="View 4 Bedroom House in Zimbali Estate, Ballito">
@@ -433,10 +430,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Bedfordview"
-    data-location="Bedfordview"
+    data-area="Bedfordview"
     data-type="House"
     data-bedrooms="4"
+    data-bathrooms="4"
     data-price="13250000"
     data-reveal>
   <a href="properties/4-bedroom-house-in-bedfordview.html" aria-label="View 4 Bedroom House in Bedfordview">
@@ -454,10 +451,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Paarl"
-    data-location="Val de Vie Estate, Paarl"
+    data-area="Paarl"
     data-type="House"
     data-bedrooms="5"
+    data-bathrooms="5"
     data-price="27000000"
     data-reveal>
   <a href="properties/5-bedroom-house-in-val-de-vie-estate-paarl.html" aria-label="View 5 Bedroom House in Val de Vie Estate, Paarl">
@@ -475,10 +472,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Durbanville"
-    data-location="Vygeboom, Durbanville"
+    data-area="Durbanville"
     data-type="House"
     data-bedrooms="3"
+    data-bathrooms="3"
     data-price="12995000"
     data-reveal>
   <a href="properties/3-bedroom-house-in-vygeboom-durbanville.html" aria-label="View 3 Bedroom House in Vygeboom, Durbanville">
@@ -496,10 +493,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="uMhlanga"
-    data-location="Hawaan Forest Estate, uMhlanga"
+    data-area="uMhlanga"
     data-type="House"
     data-bedrooms="5"
+    data-bathrooms="5"
     data-price="28000000"
     data-reveal>
   <a href="properties/5-bedroom-house-in-hawaan-forest-estate-umhlanga.html" aria-label="View 5 Bedroom House in Hawaan Forest Estate, uMhlanga">
@@ -517,10 +514,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Ballito"
-    data-location="Zimbali Lakes Resort, Ballito"
+    data-area="Ballito"
     data-type="House"
     data-bedrooms="4"
+    data-bathrooms="4"
     data-price="15950000"
     data-reveal>
   <a href="properties/4-bedroom-house-in-zimbali-lakes-resort-ballito.html" aria-label="View 4 Bedroom House in Zimbali Lakes Resort, Ballito">
@@ -538,10 +535,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Sandton"
-    data-location="Bryanston, Sandton"
+    data-area="Sandton"
     data-type="House"
     data-bedrooms="4"
+    data-bathrooms="4"
     data-price="15000000"
     data-reveal>
   <a href="properties/4-bedroom-house-in-bryanston-sandton.html" aria-label="View 4 Bedroom House in Bryanston, Sandton">
@@ -559,10 +556,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Sandton"
-    data-location="Bryanston, Sandton"
+    data-area="Sandton"
     data-type="House"
     data-bedrooms="4"
+    data-bathrooms="4"
     data-price="12500000"
     data-reveal>
   <a href="properties/4-bedroom-house-in-bryanston-sandton-2.html" aria-label="View 4 Bedroom House in Bryanston, Sandton">
@@ -580,10 +577,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="uMhlanga"
-    data-location="Hawaan Forest Estate, uMhlanga"
+    data-area="uMhlanga"
     data-type="House"
     data-bedrooms="4"
+    data-bathrooms="4"
     data-price="20495000"
     data-reveal>
   <a href="properties/4-bedroom-house-in-hawaan-forest-estate-umhlanga.html" aria-label="View 4 Bedroom House in Hawaan Forest Estate, uMhlanga">
@@ -601,10 +598,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="uMhlanga"
-    data-location="Ridgeside, uMhlanga"
+    data-area="uMhlanga"
     data-type="House"
     data-bedrooms="7"
+    data-bathrooms="7"
     data-price="22000000"
     data-reveal>
   <a href="properties/7-bedroom-house-in-ridgeside-umhlanga.html" aria-label="View 7 Bedroom House in Ridgeside, uMhlanga">
@@ -622,10 +619,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Somerset West"
-    data-location="Spanish Farm, Somerset West"
+    data-area="Somerset West"
     data-type="House"
     data-bedrooms="5"
+    data-bathrooms="5"
     data-price="52500000"
     data-reveal>
   <a href="properties/5-bedroom-house-in-spanish-farm-somerset-west.html" aria-label="View 5 Bedroom House in Spanish Farm, Somerset West">
@@ -643,10 +640,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Midrand"
-    data-location="Waterfall Country Estate, Midrand"
+    data-area="Midrand"
     data-type="House"
     data-bedrooms="4"
+    data-bathrooms="4"
     data-price="12299000"
     data-reveal>
   <a href="properties/4-bedroom-house-in-waterfall-country-estate-midrand.html" aria-label="View 4 Bedroom House in Waterfall Country Estate, Midrand">
@@ -664,10 +661,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Hillcrest"
-    data-location="Cotswold Downs Golf &amp; Country Estate, Hillcrest"
+    data-area="Hillcrest"
     data-type="House"
     data-bedrooms="4"
+    data-bathrooms="4"
     data-price="7750000"
     data-reveal>
   <a href="properties/4-bedroom-house-in-cotswold-downs-golf-country-estate-hillcrest.html" aria-label="View 4 Bedroom House in Cotswold Downs Golf &amp; Country Estate, Hillcrest">
@@ -685,10 +682,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Ballito"
-    data-location="Mount Richmore Village Estate, Ballito"
+    data-area="Ballito"
     data-type="House"
     data-bedrooms="4"
+    data-bathrooms="4"
     data-price="12500000"
     data-reveal>
   <a href="properties/4-bedroom-house-in-mount-richmore-village-estate-ballito.html" aria-label="View 4 Bedroom House in Mount Richmore Village Estate, Ballito">
@@ -706,10 +703,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Ballito"
-    data-location="Zimbali Estate, Ballito"
+    data-area="Ballito"
     data-type="House"
     data-bedrooms="4"
+    data-bathrooms="4"
     data-price="13500000"
     data-reveal>
   <a href="properties/4-bedroom-house-in-zimbali-estate-ballito-2.html" aria-label="View 4 Bedroom House in Zimbali Estate, Ballito">
@@ -727,10 +724,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Kempton Park"
-    data-location="Serengeti Lifestyle Estate, Kempton Park"
+    data-area="Kempton Park"
     data-type="House"
     data-bedrooms="4"
+    data-bathrooms="4"
     data-price="36000000"
     data-reveal>
   <a href="properties/4-bedroom-house-in-serengeti-lifestyle-estate-kempton-park.html" aria-label="View 4 Bedroom House in Serengeti Lifestyle Estate, Kempton Park">
@@ -748,10 +745,10 @@
   </a>
 </article>
       <article class="p-card" data-filter-card
-    data-region="Midrand"
-    data-location="Blue Hills Equestrian Estate, Midrand"
+    data-area="Midrand"
     data-type="House"
     data-bedrooms="4"
+    data-bathrooms="4"
     data-price="19999999"
     data-reveal>
   <a href="properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand.html" aria-label="View 4 Bedroom House in Blue Hills Equestrian Estate, Midrand">
@@ -778,19 +775,14 @@
     <div class="cta-band" style="border-top:none;">
       <div class="cta-band__row">
         <h2>Let's find<br>your next home.</h2>
-        <a class="btn btn-gold" href="https://wa.me/27000000000?text=Hi%20SA%20Homes%204U%2C%20I'd%20like%20to%20enquire%20about%20a%20property." target="_blank" rel="noopener"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.5 0-10 4.5-10 10 0 1.77.47 3.45 1.3 4.9L2 22l5.25-1.38a9.96 9.96 0 0 0 4.79 1.22h.01c5.5 0 10-4.5 10-10s-4.5-9.84-10.01-9.84Zm0 18.2a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.34c0-4.53 3.69-8.22 8.24-8.22 4.54 0 8.22 3.68 8.22 8.22 0 4.53-3.69 8.2-8.23 8.2Zm4.52-6.16c-.25-.12-1.47-.72-1.7-.8-.23-.08-.4-.12-.56.13-.17.25-.65.8-.8.96-.15.17-.29.19-.54.06-.25-.12-1.06-.39-2.02-1.24-.75-.66-1.25-1.48-1.4-1.73-.15-.25-.02-.38.11-.51.11-.11.25-.29.37-.44.12-.15.16-.25.25-.42.08-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.08s.9 2.41 1.02 2.58c.12.17 1.77 2.7 4.28 3.79.6.26 1.06.41 1.43.53.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.17-.48-.29Z"/></svg> Message on WhatsApp</a>
+        <a class="btn btn-accent" href="https://www.instagram.com/sa_homes4u/" target="_blank" rel="noopener"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg> Message on Instagram</a>
       </div>
     </div>
     <div class="footer-grid">
-      <div class="footer-col">
-        <h4>Address</h4>
-        <p>Address to be confirmed</p>
-        <p>South Africa</p>
-      </div>
+      
       <div class="footer-col">
         <h4>Contact</h4>
-        <a href="tel:+27000000000">+27 00 000 0000</a>
-        <a href="mailto:info@sahomes4u.example">info@sahomes4u.example</a>
+        <p>Reach us on Instagram for now.</p>
       </div>
       <div class="footer-col">
         <h4>Follow</h4>
@@ -812,7 +804,7 @@
   </div>
 </footer>
 <div class="floating-cta">
-  <a class="btn btn-primary" href="https://wa.me/27000000000?text=Hi%20SA%20Homes%204U%2C%20I'd%20like%20to%20enquire%20about%20a%20property." target="_blank" rel="noopener"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.5 0-10 4.5-10 10 0 1.77.47 3.45 1.3 4.9L2 22l5.25-1.38a9.96 9.96 0 0 0 4.79 1.22h.01c5.5 0 10-4.5 10-10s-4.5-9.84-10.01-9.84Zm0 18.2a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.34c0-4.53 3.69-8.22 8.24-8.22 4.54 0 8.22 3.68 8.22 8.22 0 4.53-3.69 8.2-8.23 8.2Zm4.52-6.16c-.25-.12-1.47-.72-1.7-.8-.23-.08-.4-.12-.56.13-.17.25-.65.8-.8.96-.15.17-.29.19-.54.06-.25-.12-1.06-.39-2.02-1.24-.75-.66-1.25-1.48-1.4-1.73-.15-.25-.02-.38.11-.51.11-.11.25-.29.37-.44.12-.15.16-.25.25-.42.08-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.08s.9 2.41 1.02 2.58c.12.17 1.77 2.7 4.28 3.79.6.26 1.06.41 1.43.53.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.17-.48-.29Z"/></svg> Enquire Now</a>
+  <a class="btn btn-primary" href="https://www.instagram.com/sa_homes4u/" target="_blank" rel="noopener"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg> Enquire Now</a>
 </div>
 <div class="lightbox" id="lightbox" aria-hidden="true">
   <button type="button" class="lightbox__close" id="lightboxClose" aria-label="Close gallery"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M18 6 6 18"/></svg></button>

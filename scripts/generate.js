@@ -15,20 +15,38 @@ const ROOT = path.resolve(__dirname, '..');
 const DATA_PATH = path.join(ROOT, 'data', 'properties.json');
 
 // ---------------------------------------------------------------------------
-// Placeholder business contact details.
+// Business contact details.
 // SA Homes 4U's own phone/email/WhatsApp number was not present anywhere in
 // the scraped Instagram data (only individual estate agents' numbers appear
 // inside some captions, which belong to third-party agencies, not this
-// business). These are clearly-fake placeholders — replace before launch.
+// business). Rather than publish fabricated contact details, these stay
+// `null` until the real values are supplied — every template below checks
+// `has*()` and falls back to the one channel we know is genuine: Instagram.
+// Fill these in and re-run the generator once SA Homes 4U provides them.
 // ---------------------------------------------------------------------------
 const CONFIG = {
-  whatsappNumber: '27000000000', // PLACEHOLDER — replace with the real business WhatsApp number
-  phoneDisplay: '+27 00 000 0000', // PLACEHOLDER
-  email: 'info@sahomes4u.example', // PLACEHOLDER
-  addressLine1: 'Address to be confirmed', // PLACEHOLDER
+  whatsappNumber: null, // e.g. '27821234567' — no leading +, no spaces
+  phoneDisplay: null, // e.g. '+27 82 123 4567'
+  email: null, // e.g. 'info@sahomes4u.co.za'
+  addressLine1: null, // e.g. 'Suite 4, 12 Main Road, Sea Point'
   instagram: 'https://www.instagram.com/sa_homes4u/',
   instagramHandle: '@sa_homes4u',
 };
+
+const hasWhatsapp = () => Boolean(CONFIG.whatsappNumber);
+const hasPhone = () => Boolean(CONFIG.phoneDisplay);
+const hasEmail = () => Boolean(CONFIG.email);
+const hasAddress = () => Boolean(CONFIG.addressLine1);
+
+// The one enquiry channel guaranteed to be real. Every CTA that would
+// otherwise depend on a placeholder phone/email/WhatsApp number falls back
+// to this instead of linking users to fabricated contact details.
+function primaryCta(property) {
+  if (hasWhatsapp()) {
+    return { href: whatsappLink(property), label: 'Message on WhatsApp', icon: ICONS.whatsapp };
+  }
+  return { href: CONFIG.instagram, label: 'Message on Instagram', icon: ICONS.instagram };
+}
 
 const properties = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
 
@@ -63,17 +81,24 @@ function esc(str) {
     .replace(/"/g, '&quot;');
 }
 
-function regionOf(location) {
+// Broad city/suburb/market-area grouping, used for filtering and location
+// stats. Every current listing carries an explicit "area" in properties.json
+// (deliberately normalized — e.g. several distinct estates all roll up to
+// "Ballito" or "Sandton"); this is only a safety net for a future listing
+// that omits it, so the site still builds instead of erroring.
+function fallbackAreaFromLocation(location) {
   const parts = location.split(',').map((s) => s.trim());
   return parts[parts.length - 1];
 }
 
 // Attach derived fields once, up front.
-const enriched = properties.map((p) => ({
-  ...p,
-  slug: slugOf(p),
-  region: regionOf(p.location),
-}));
+const enriched = properties.map((p) => {
+  const area = p.area || fallbackAreaFromLocation(p.location);
+  if (!p.area) {
+    console.warn(`Property "${p.title}" has no "area" set — falling back to "${area}" derived from location.`);
+  }
+  return { ...p, slug: slugOf(p), area };
+});
 
 function bySlug(slug) {
   return enriched.find((p) => p.slug === slug);
@@ -81,15 +106,15 @@ function bySlug(slug) {
 
 function relatedFor(property, count = 3) {
   const pool = enriched.filter((p) => p.slug !== property.slug);
-  const sameRegion = pool.filter((p) => p.region === property.region);
-  const sameBedrooms = pool.filter((p) => p.bedrooms === property.bedrooms && p.region !== property.region);
+  const sameArea = pool.filter((p) => p.area === property.area);
+  const sameBedrooms = pool.filter((p) => p.bedrooms === property.bedrooms && p.area !== property.area);
   const byPriceDistance = [...pool].sort(
     (a, b) => Math.abs(a.askingPrice - property.askingPrice) - Math.abs(b.askingPrice - property.askingPrice)
   );
 
   const picked = [];
   const seen = new Set();
-  for (const list of [sameRegion, sameBedrooms, byPriceDistance]) {
+  for (const list of [sameArea, sameBedrooms, byPriceDistance]) {
     for (const p of list) {
       if (picked.length >= count) break;
       if (seen.has(p.slug)) continue;
@@ -101,6 +126,7 @@ function relatedFor(property, count = 3) {
 }
 
 function whatsappLink(property) {
+  if (!hasWhatsapp()) return null;
   const msg = property
     ? `Hi SA Homes 4U, I'm interested in ${property.title} (${formatPrice(property.askingPrice)}). Could you tell me more?\n\n${property.canonicalUrl || ''}`
     : `Hi SA Homes 4U, I'd like to enquire about a property.`;
@@ -122,6 +148,7 @@ const ICONS = {
   close: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M18 6 6 18"/></svg>`,
   chevL: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 6l-6 6 6 6"/></svg>`,
   chevR: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"/></svg>`,
+  instagram: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>`,
 };
 
 // ---------------------------------------------------------------------------
@@ -166,8 +193,8 @@ function header(activeHref, root) {
     ${NAV_ITEMS.map((item) => `<a href="${root}${item.href}">${item.label}</a>`).join('\n    ')}
   </div>
   <div class="nav-overlay__meta">
-    <a href="${esc(whatsappLink())}" target="_blank" rel="noopener">WhatsApp: ${CONFIG.phoneDisplay}</a>
-    <a href="mailto:${CONFIG.email}">${CONFIG.email}</a>
+    ${hasWhatsapp() ? `<a href="${esc(whatsappLink())}" target="_blank" rel="noopener">WhatsApp: ${CONFIG.phoneDisplay}</a>` : ''}
+    ${hasEmail() ? `<a href="mailto:${CONFIG.email}">${CONFIG.email}</a>` : ''}
     <a href="${CONFIG.instagram}" target="_blank" rel="noopener">${CONFIG.instagramHandle} on Instagram</a>
   </div>
 </div>`;
@@ -176,8 +203,9 @@ function header(activeHref, root) {
 function floatingCta(root, mode) {
   if (mode === 'none') return '';
   if (mode === 'enquire') {
+    const cta = primaryCta();
     return `<div class="floating-cta">
-  <a class="btn btn-primary" href="${esc(whatsappLink())}" target="_blank" rel="noopener">${ICONS.whatsapp} Enquire Now</a>
+  <a class="btn btn-primary" href="${esc(cta.href)}" target="_blank" rel="noopener">${cta.icon} Enquire Now</a>
 </div>`;
   }
   return `<div class="floating-cta">
@@ -186,25 +214,35 @@ function floatingCta(root, mode) {
 }
 
 function footer(root) {
+  const cta = primaryCta();
+  const addressCol = hasAddress()
+    ? `<div class="footer-col">
+        <h4>Address</h4>
+        <p>${esc(CONFIG.addressLine1)}</p>
+        <p>South Africa</p>
+      </div>`
+    : '';
+  const contactLines = [
+    hasPhone() ? `<a href="tel:${CONFIG.phoneDisplay.replace(/\s+/g, '')}">${CONFIG.phoneDisplay}</a>` : '',
+    hasEmail() ? `<a href="mailto:${CONFIG.email}">${CONFIG.email}</a>` : '',
+  ]
+    .filter(Boolean)
+    .join('\n        ');
+  const contactCol = `<div class="footer-col">
+        <h4>Contact</h4>
+        ${contactLines || `<p>Reach us on Instagram for now.</p>`}
+      </div>`;
   return `<footer class="site-footer">
   <div class="container">
     <div class="cta-band" style="border-top:none;">
       <div class="cta-band__row">
         <h2>Let's find<br>your next home.</h2>
-        <a class="btn btn-gold" href="${esc(whatsappLink())}" target="_blank" rel="noopener">${ICONS.whatsapp} Message on WhatsApp</a>
+        <a class="btn btn-accent" href="${esc(cta.href)}" target="_blank" rel="noopener">${cta.icon} ${cta.label}</a>
       </div>
     </div>
     <div class="footer-grid">
-      <div class="footer-col">
-        <h4>Address</h4>
-        <p>${esc(CONFIG.addressLine1)}</p>
-        <p>South Africa</p>
-      </div>
-      <div class="footer-col">
-        <h4>Contact</h4>
-        <a href="tel:${CONFIG.phoneDisplay.replace(/\s+/g, '')}">${CONFIG.phoneDisplay}</a>
-        <a href="mailto:${CONFIG.email}">${CONFIG.email}</a>
-      </div>
+      ${addressCol}
+      ${contactCol}
       <div class="footer-col">
         <h4>Follow</h4>
         <a href="${CONFIG.instagram}" target="_blank" rel="noopener">${CONFIG.instagramHandle}</a>
@@ -286,10 +324,10 @@ function propertyCard(property, { size = '', index, root }) {
 
 function gridCard(property, root) {
   return `<article class="p-card" data-filter-card
-    data-region="${esc(property.region)}"
-    data-location="${esc(property.location)}"
+    data-area="${esc(property.area)}"
     data-type="${esc(property.propertyType)}"
     data-bedrooms="${property.bedrooms}"
+    data-bathrooms="${property.bathrooms != null ? property.bathrooms : ''}"
     data-price="${property.askingPrice}"
     data-reveal>
   <a href="${root}properties/${property.slug}.html" aria-label="View ${esc(property.title)}">
@@ -320,7 +358,7 @@ function buildHome() {
     .sort((a, b) => new Date(b.instagramPostDate) - new Date(a.instagramPostDate))
     .slice(3, 9);
 
-  const locations = [...new Set(enriched.map((p) => p.region))];
+  const areas = [...new Set(enriched.map((p) => p.area))];
 
   const content = `
 <section class="hero">
@@ -329,7 +367,7 @@ function buildHome() {
   </div>
   <div class="hero__scrim"></div>
   <div class="hero__body">
-    <h1 class="hero__wordmark">SA Homes<span class="gold">4U<sup>TM</sup></span></h1>
+    <h1 class="hero__wordmark">SA Homes<span class="accent">4U<sup>TM</sup></span></h1>
     <p class="hero__tagline">Homes with a point of view</p>
   </div>
   <div class="hero__footer">
@@ -346,7 +384,7 @@ function buildHome() {
       <p class="manifesto__body">SA Homes 4U brings together standout residences from across South Africa's most sought-after estates and suburbs &mdash; from the Cape Winelands to the KwaZulu-Natal coast, Gauteng's private estates to the Garden Route. Every home in our collection is presented with the photography and detail it deserves, for buyers who know exactly what they're looking for.</p>
       <dl class="manifesto__meta">
         <div><dt>Listings</dt><dd>${enriched.length} homes currently presented</dd></div>
-        <div><dt>Reach</dt><dd>${locations.length} locations across South Africa</dd></div>
+        <div><dt>Reach</dt><dd>${areas.length} areas across South Africa</dd></div>
         <div><dt>Since</dt><dd>Est. 2020</dd></div>
       </dl>
     </div>
@@ -390,7 +428,7 @@ function buildHome() {
 <section class="cta-band">
   <div class="container cta-band__row" data-reveal>
     <h2>Selling a home that deserves a closer look?</h2>
-    <a class="btn btn-gold" href="sell-with-us.html">Sell With Us ${ICONS.arrow}</a>
+    <a class="btn btn-accent" href="sell-with-us.html">Sell With Us ${ICONS.arrow}</a>
   </div>
 </section>
 `;
@@ -401,6 +439,7 @@ function buildHome() {
     root,
     activeHref: '',
     canonical: 'index.html',
+    bodyClass: 'is-home',
     content,
     ctaMode: 'none',
   });
@@ -411,66 +450,83 @@ function buildHome() {
 // ---------------------------------------------------------------------------
 function buildPropertiesPage() {
   const root = '';
-  const locations = [...new Set(enriched.map((p) => p.location))].sort();
-  const types = [...new Set(enriched.map((p) => p.propertyType))].sort();
-  const bedroomCounts = [...new Set(enriched.map((p) => p.bedrooms))].sort((a, b) => a - b);
-  const prices = enriched.map((p) => p.askingPrice);
-  const minPrice = Math.min(...prices);
-  const maxPrice = Math.max(...prices);
+  const areas = [...new Set(enriched.map((p) => p.area))].sort();
 
-  const priceSteps = [5000000, 10000000, 15000000, 20000000, 25000000, 30000000, 40000000, 50000000, 60000000].filter(
-    (v) => v >= minPrice - 5000000 && v <= maxPrice + 5000000
-  );
+  // Always offer House/Apartment as a baseline, even if one has no current
+  // listings, plus whatever other types show up in the data (Townhouse,
+  // Penthouse, etc.) so the dropdown grows on its own as listings diversify.
+  const baselineTypes = ['House', 'Apartment'];
+  const otherTypes = [...new Set(enriched.map((p) => p.propertyType))]
+    .filter((t) => !baselineTypes.includes(t))
+    .sort();
+  const types = [...baselineTypes, ...otherTypes];
+
+  const minMaxOptions = [1, 2, 3, 4, 5];
 
   const content = `
 <section class="page-hero">
   <div class="container">
     <span class="eyebrow">The Collection</span>
     <h1>Every Home We Currently Represent</h1>
-    <p>Search the full collection by location, property type, bedrooms, and price.</p>
+    <p>Search the full collection by area, property type, bedrooms, and bathrooms — set your own price range, then sort by price or browse the latest additions.</p>
   </div>
 </section>
 
 <section class="section section--tight">
   <div class="container">
-    <div class="filter-bar" role="search" aria-label="Filter properties">
-      <div class="filter-field">
-        <label for="fLocation">Location</label>
-        <select id="fLocation">
-          <option value="">Any Location</option>
-          ${locations.map((l) => `<option value="${esc(l)}">${esc(l)}</option>`).join('\n          ')}
-        </select>
+    <form class="filter-bar" id="filterForm" role="search" aria-label="Filter properties">
+      <div class="filter-grid">
+        <div class="filter-field">
+          <label for="fArea">Area</label>
+          <select id="fArea">
+            <option value="">Any Area</option>
+            ${areas.map((a) => `<option value="${esc(a)}">${esc(a)}</option>`).join('\n            ')}
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="fType">Property Type</label>
+          <select id="fType">
+            <option value="">Any Type</option>
+            ${types.map((t) => `<option value="${esc(t)}">${esc(t)}</option>`).join('\n            ')}
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="fBedrooms">Bedrooms</label>
+          <select id="fBedrooms">
+            <option value="">Any</option>
+            ${minMaxOptions.map((n) => `<option value="${n}">${n}+</option>`).join('\n            ')}
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="fBathrooms">Bathrooms</label>
+          <select id="fBathrooms">
+            <option value="">Any</option>
+            ${minMaxOptions.map((n) => `<option value="${n}">${n}+</option>`).join('\n            ')}
+          </select>
+        </div>
+        <div class="filter-field">
+          <label for="fMin">Minimum Price</label>
+          <input type="text" inputmode="numeric" autocomplete="off" id="fMin" placeholder="e.g. R 7 500 000">
+        </div>
+        <div class="filter-field">
+          <label for="fMax">Maximum Price</label>
+          <input type="text" inputmode="numeric" autocomplete="off" id="fMax" placeholder="e.g. R 27 500 000">
+        </div>
+        <div class="filter-field">
+          <label for="fSort">Sort By</label>
+          <select id="fSort">
+            <option value="default">Default / Latest</option>
+            <option value="price-asc">Price: Low to High</option>
+            <option value="price-desc">Price: High to Low</option>
+          </select>
+        </div>
       </div>
-      <div class="filter-field">
-        <label for="fType">Property Type</label>
-        <select id="fType">
-          <option value="">Any Type</option>
-          ${types.map((t) => `<option value="${esc(t)}">${esc(t)}</option>`).join('\n          ')}
-        </select>
+      <p class="filter-error" id="priceError" role="alert" hidden>Minimum price can&rsquo;t be higher than maximum price.</p>
+      <div class="filter-actions">
+        <button type="submit" class="btn btn-primary filter-submit" id="filterSearch">Search Properties</button>
+        <button type="button" class="filter-reset" id="filterReset">Reset Filters</button>
       </div>
-      <div class="filter-field">
-        <label for="fBedrooms">Bedrooms</label>
-        <select id="fBedrooms">
-          <option value="">Any</option>
-          ${bedroomCounts.map((b) => `<option value="${b}">${b}+ Bedrooms</option>`).join('\n          ')}
-        </select>
-      </div>
-      <div class="filter-field">
-        <label for="fMin">Minimum Price</label>
-        <select id="fMin">
-          <option value="">No Min</option>
-          ${priceSteps.map((v) => `<option value="${v}">${formatPrice(v)}</option>`).join('\n          ')}
-        </select>
-      </div>
-      <div class="filter-field">
-        <label for="fMax">Maximum Price</label>
-        <select id="fMax">
-          <option value="">No Max</option>
-          ${priceSteps.map((v) => `<option value="${v}">${formatPrice(v)}</option>`).join('\n          ')}
-        </select>
-      </div>
-      <button type="button" class="filter-reset" id="filterReset">Reset Filters</button>
-    </div>
+    </form>
 
     <div class="results-meta">
       <span id="resultsCount">Showing all ${enriched.length} properties</span>
@@ -570,9 +626,12 @@ function buildPropertyPage(property) {
       <aside class="enquiry-card">
         <h3>Interested in this home?</h3>
         <p>Speak to the SA Homes 4U team about ${esc(property.title)}.</p>
-        <a class="btn btn-primary btn-block" href="${esc(whatsappLink(property))}" target="_blank" rel="noopener">${ICONS.whatsapp} WhatsApp Enquiry</a>
+        ${(() => {
+          const cta = primaryCta(property);
+          return `<a class="btn btn-primary btn-block" href="${esc(cta.href)}" target="_blank" rel="noopener">${cta.icon} ${cta.label}</a>`;
+        })()}
         <a class="btn btn-outline btn-block" href="${root}contact.html?property=${encodeURIComponent(property.slug)}">Arrange Viewing</a>
-        <a class="btn btn-outline btn-block" href="mailto:${CONFIG.email}?subject=${encodeURIComponent('Enquiry: ' + property.title)}">Contact Agent</a>
+        ${hasEmail() ? `<a class="btn btn-outline btn-block" href="mailto:${CONFIG.email}?subject=${encodeURIComponent('Enquiry: ' + property.title)}">Contact Agent</a>` : ''}
         <p class="enquiry-card__note">Asking price ${formatPrice(property.askingPrice)}. Figures and specifications shown are as supplied and subject to confirmation.</p>
       </aside>
     </div>
@@ -609,7 +668,7 @@ function buildPropertyPage(property) {
 // ---------------------------------------------------------------------------
 function buildAbout() {
   const root = '';
-  const locations = [...new Set(enriched.map((p) => p.region))];
+  const areas = [...new Set(enriched.map((p) => p.area))];
   const content = `
 <section class="page-hero">
   <div class="container">
@@ -624,8 +683,8 @@ function buildAbout() {
     <div data-reveal>
       <span class="eyebrow">Our Approach</span>
       <h2 style="margin-top:14px; font-size:clamp(1.8rem,3vw,2.6rem);">Homes with a point of view</h2>
-      <p style="margin-top:18px; color:var(--cream-dim); line-height:1.8;">Every home in our collection is chosen and presented on its own merits &mdash; its setting, its design, and what makes it worth a closer look. We work across South Africa's most sought-after addresses, from the Cape Winelands and Atlantic Seaboard to Gauteng's private estates and the KwaZulu-Natal coast.</p>
-      <p style="margin-top:18px; color:var(--cream-dim); line-height:1.8;">Our collection currently spans ${locations.length} locations across South Africa, presenting ${enriched.length} homes to buyers who know exactly what they're looking for.</p>
+      <p style="margin-top:18px; color:var(--text-dim); line-height:1.8;">Every home in our collection is chosen and presented on its own merits &mdash; its setting, its design, and what makes it worth a closer look. We work across South Africa's most sought-after addresses, from the Cape Winelands and Atlantic Seaboard to Gauteng's private estates and the KwaZulu-Natal coast.</p>
+      <p style="margin-top:18px; color:var(--text-dim); line-height:1.8;">Our collection currently spans ${areas.length} areas across South Africa, presenting ${enriched.length} homes to buyers who know exactly what they're looking for.</p>
     </div>
     <img src="assets/properties/8-bedroom-house-in-the-hills-game-reserve-pretoria/01.webp" alt="A featured SA Homes 4U property" loading="lazy">
   </div>
@@ -650,7 +709,7 @@ function buildAbout() {
       <div class="value-card" data-reveal>
         <span class="eyebrow">Access</span>
         <h3>A direct line to the team</h3>
-        <p>Every listing connects straight to a real enquiry &mdash; WhatsApp, phone, or email &mdash; with no unnecessary steps in between.</p>
+        <p>Every listing connects straight to a real enquiry ${hasWhatsapp() ? '&mdash; WhatsApp, phone, or email &mdash;' : '&mdash; via Instagram, with more direct channels coming soon &mdash;'} with no unnecessary steps in between.</p>
       </div>
     </div>
   </div>
@@ -659,7 +718,7 @@ function buildAbout() {
 <section class="cta-band">
   <div class="container cta-band__row" data-reveal>
     <h2>Ready to see the collection?</h2>
-    <a class="btn btn-gold" href="properties.html">View Collection ${ICONS.arrow}</a>
+    <a class="btn btn-accent" href="properties.html">View Collection ${ICONS.arrow}</a>
   </div>
 </section>
 `;
@@ -692,7 +751,7 @@ function buildSell() {
     <div data-reveal>
       <span class="eyebrow">Why List With Us</span>
       <h2 style="margin-top:14px; font-size:clamp(1.6rem,3vw,2.2rem);">Presentation that matches your asking price</h2>
-      <p style="margin-top:18px; color:var(--cream-dim); line-height:1.8;">We present each home individually &mdash; full photography, a dedicated page, and direct enquiries routed straight to our team. No generic listings, no lost detail.</p>
+      <p style="margin-top:18px; color:var(--text-dim); line-height:1.8;">We present each home individually &mdash; full photography, a dedicated page, and direct enquiries routed straight to our team. No generic listings, no lost detail.</p>
       <div class="value-grid" style="grid-template-columns:1fr; margin-top:32px;">
         <div class="value-card">
           <span class="eyebrow">Step One</span>
@@ -734,7 +793,11 @@ function buildSell() {
         <textarea id="sDetails" name="details" placeholder="Bedrooms, property type, what makes it stand out..."></textarea>
       </div>
       <button type="submit" class="btn btn-primary btn-block" id="sellSubmit">Submit Enquiry ${ICONS.arrow}</button>
-      <a class="btn btn-outline btn-block" href="${esc(whatsappLink())}" target="_blank" rel="noopener">${ICONS.whatsapp} Or WhatsApp Us Directly</a>
+      ${(() => {
+        const cta = primaryCta();
+        return `<a class="btn btn-outline btn-block" href="${esc(cta.href)}" target="_blank" rel="noopener">${cta.icon} Or ${cta.label}</a>`;
+      })()}
+      <p class="form-note" id="sellFormNote" hidden></p>
     </form>
   </div>
 </section>
@@ -746,7 +809,7 @@ function buildSell() {
     activeHref: 'sell-with-us.html',
     canonical: 'sell-with-us.html',
     content,
-    extraScripts: `<script>window.__SELL_WHATSAPP__ = ${JSON.stringify(CONFIG.whatsappNumber)};</script>`,
+    extraScripts: `<script>window.__SELL_WHATSAPP__ = ${JSON.stringify(CONFIG.whatsappNumber)}; window.__INSTAGRAM__ = ${JSON.stringify(CONFIG.instagram)};</script>`,
     // The form's own submit button + direct WhatsApp link already cover
     // enquiries here, and a fixed pill would overlap the form fields in
     // this two-column layout.
@@ -759,6 +822,21 @@ function buildSell() {
 // ---------------------------------------------------------------------------
 function buildContact() {
   const root = '';
+  const cta = primaryCta();
+  const knownDetails = [
+    hasWhatsapp()
+      ? `<div class="contact-detail"><dt>WhatsApp</dt><dd><a href="${esc(whatsappLink())}" target="_blank" rel="noopener">${CONFIG.phoneDisplay}</a></dd></div>`
+      : '',
+    hasPhone()
+      ? `<div class="contact-detail"><dt>Phone</dt><dd><a href="tel:${CONFIG.phoneDisplay.replace(/\s+/g, '')}">${CONFIG.phoneDisplay}</a></dd></div>`
+      : '',
+    hasEmail()
+      ? `<div class="contact-detail"><dt>Email</dt><dd><a href="mailto:${CONFIG.email}">${CONFIG.email}</a></dd></div>`
+      : '',
+  ]
+    .filter(Boolean)
+    .join('\n      ');
+
   const content = `
 <section class="page-hero">
   <div class="container">
@@ -771,26 +849,16 @@ function buildContact() {
 <section class="section">
   <div class="container contact-grid">
     <div data-reveal>
-      <div class="contact-detail">
-        <dt>WhatsApp</dt>
-        <dd><a href="${esc(whatsappLink())}" target="_blank" rel="noopener">${CONFIG.phoneDisplay}</a></dd>
-      </div>
-      <div class="contact-detail">
-        <dt>Phone</dt>
-        <dd><a href="tel:${CONFIG.phoneDisplay.replace(/\s+/g, '')}">${CONFIG.phoneDisplay}</a></dd>
-      </div>
-      <div class="contact-detail">
-        <dt>Email</dt>
-        <dd><a href="mailto:${CONFIG.email}">${CONFIG.email}</a></dd>
-      </div>
+      ${knownDetails}
       <div class="contact-detail">
         <dt>Instagram</dt>
         <dd><a href="${CONFIG.instagram}" target="_blank" rel="noopener">${CONFIG.instagramHandle}</a></dd>
       </div>
-      <a class="btn btn-gold" href="${esc(whatsappLink())}" target="_blank" rel="noopener" style="margin-top:12px;">${ICONS.whatsapp} Message on WhatsApp</a>
+      ${!hasWhatsapp() && !hasPhone() && !hasEmail() ? `<p class="form-note">Our direct phone and email lines are being finalised &mdash; for now, the fastest way to reach us is Instagram.</p>` : ''}
+      <a class="btn btn-accent" href="${esc(cta.href)}" target="_blank" rel="noopener" style="margin-top:12px;">${cta.icon} ${cta.label}</a>
     </div>
 
-    <form class="contact-form" onsubmit="return false;" data-reveal>
+    <form class="contact-form" data-role="contact-form" onsubmit="return false;" data-reveal>
       <div>
         <label for="cName">Full Name</label>
         <input id="cName" type="text" name="name" required>
@@ -808,6 +876,7 @@ function buildContact() {
         <textarea id="cMessage" name="message" required></textarea>
       </div>
       <button type="submit" class="btn btn-primary btn-block" id="contactSubmit">Send Enquiry ${ICONS.arrow}</button>
+      <p class="form-note" id="contactFormNote" hidden></p>
     </form>
   </div>
 </section>
@@ -819,7 +888,7 @@ function buildContact() {
     activeHref: 'contact.html',
     canonical: 'contact.html',
     content,
-    extraScripts: `<script>window.__CONTACT_EMAIL__ = ${JSON.stringify(CONFIG.email)};</script>`,
+    extraScripts: `<script>window.__CONTACT_EMAIL__ = ${JSON.stringify(CONFIG.email)}; window.__INSTAGRAM__ = ${JSON.stringify(CONFIG.instagram)};</script>`,
     // Same reasoning as Sell With Us: the form + WhatsApp link already
     // cover enquiries, and a fixed pill would overlap the form column.
     ctaMode: 'none',

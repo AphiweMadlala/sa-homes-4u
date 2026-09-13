@@ -70,62 +70,222 @@
     });
   }
 
-  /* ---------- Property filters (properties.html) ---------- */
+  /* ---------- Property filters + sort (properties.html) ---------- */
   var grid = document.getElementById('propertyGrid');
   if (grid) {
-    var cards = Array.prototype.slice.call(grid.querySelectorAll('[data-filter-card]'));
-    var fLocation = document.getElementById('fLocation');
+    // Original markup order, captured once — this is what "Default / Latest"
+    // restores, and what every other sort mode reorders away from.
+    var originalOrder = Array.prototype.slice.call(grid.querySelectorAll('[data-filter-card]'));
+
+    var fArea = document.getElementById('fArea');
     var fType = document.getElementById('fType');
     var fBedrooms = document.getElementById('fBedrooms');
+    var fBathrooms = document.getElementById('fBathrooms');
     var fMin = document.getElementById('fMin');
     var fMax = document.getElementById('fMax');
+    var fSort = document.getElementById('fSort');
+    var filterForm = document.getElementById('filterForm');
     var resetBtn = document.getElementById('filterReset');
     var resultsCount = document.getElementById('resultsCount');
     var emptyState = document.getElementById('emptyState');
+    var priceError = document.getElementById('priceError');
 
-    function applyFilters() {
-      var loc = fLocation.value;
-      var type = fType.value;
-      var minBeds = fBedrooms.value ? parseInt(fBedrooms.value, 10) : null;
-      var min = fMin.value ? parseInt(fMin.value, 10) : null;
-      var max = fMax.value ? parseInt(fMax.value, 10) : null;
+    // Strips "R", spaces, commas and any other non-digit characters so
+    // "R 7 500 000", "7500000" and "R7,500,000" all parse the same way.
+    // Returns null for blank/invalid input rather than throwing, so a
+    // stray letter can never break filtering.
+    function parsePrice(raw) {
+      if (raw == null) return null;
+      var digits = String(raw).replace(/[^\d]/g, '');
+      if (!digits) return null;
+      var n = parseInt(digits, 10);
+      return isNaN(n) ? null : n;
+    }
 
-      var visibleCount = 0;
-      cards.forEach(function (card) {
-        var matchLoc = !loc || card.dataset.location === loc;
-        var matchType = !type || card.dataset.type === type;
-        var beds = parseInt(card.dataset.bedrooms, 10);
-        var matchBeds = minBeds == null || beds >= minBeds;
-        var price = parseInt(card.dataset.price, 10);
-        var matchMin = min == null || price >= min;
-        var matchMax = max == null || price <= max;
-        var visible = matchLoc && matchType && matchBeds && matchMin && matchMax;
-        card.hidden = !visible;
-        if (visible) visibleCount++;
+    // The filters actually in effect. Only Search Properties (or a Reset,
+    // or restoring from the URL on load) updates this — Sort By re-reads it
+    // to resort the current result set without re-running the search.
+    var appliedFilters = { area: '', type: '', minBeds: null, minBaths: null, min: null, max: null };
+    var appliedSort = 'default';
+
+    function validatePriceRange() {
+      var min = parsePrice(fMin.value);
+      var max = parsePrice(fMax.value);
+      var invalid = min != null && max != null && min > max;
+      priceError.hidden = !invalid;
+      return !invalid;
+    }
+    fMin.addEventListener('input', validatePriceRange);
+    fMax.addEventListener('input', validatePriceRange);
+
+    function cardMatches(card, filters) {
+      var matchArea = !filters.area || card.dataset.area === filters.area;
+      var matchType = !filters.type || card.dataset.type === filters.type;
+      var beds = parseInt(card.dataset.bedrooms, 10);
+      var matchBeds = filters.minBeds == null || (!isNaN(beds) && beds >= filters.minBeds);
+      var baths = parseInt(card.dataset.bathrooms, 10);
+      var matchBaths = filters.minBaths == null || (!isNaN(baths) && baths >= filters.minBaths);
+      var price = parseInt(card.dataset.price, 10);
+      var matchMin = filters.min == null || (!isNaN(price) && price >= filters.min);
+      var matchMax = filters.max == null || (!isNaN(price) && price <= filters.max);
+      return matchArea && matchType && matchBeds && matchBaths && matchMin && matchMax;
+    }
+
+    function currentlyVisible() {
+      return originalOrder.filter(function (card) {
+        return !card.hidden;
       });
+    }
 
+    function renderSort() {
+      var visible = currentlyVisible();
+      var sorted;
+      if (appliedSort === 'price-asc' || appliedSort === 'price-desc') {
+        sorted = visible.slice().sort(function (a, b) {
+          var pa = parseInt(a.dataset.price, 10);
+          var pb = parseInt(b.dataset.price, 10);
+          return appliedSort === 'price-asc' ? pa - pb : pb - pa;
+        });
+      } else {
+        // "Default / Latest": the order cards already appear in the DOM,
+        // which is original markup order for the visible subset.
+        sorted = visible;
+      }
+      // Move nodes into place rather than re-creating them, so galleries,
+      // lazy-loaded images and reveal state on each card are preserved.
+      sorted.forEach(function (card) {
+        grid.appendChild(card);
+      });
+    }
+
+    function updateResultsMeta(visibleCount) {
+      var total = originalOrder.length;
       resultsCount.textContent =
-        visibleCount === cards.length
-          ? 'Showing all ' + cards.length + ' properties'
-          : 'Showing ' + visibleCount + ' of ' + cards.length + ' properties';
+        visibleCount === total
+          ? 'Showing all ' + total + ' properties'
+          : 'Showing ' + visibleCount + ' of ' + total + ' properties';
       emptyState.hidden = visibleCount !== 0;
     }
 
-    [fLocation, fType, fBedrooms, fMin, fMax].forEach(function (el) {
-      el.addEventListener('change', applyFilters);
-    });
-    resetBtn.addEventListener('click', function () {
-      [fLocation, fType, fBedrooms, fMin, fMax].forEach(function (el) {
-        el.value = '';
+    function render() {
+      var visibleCount = 0;
+      originalOrder.forEach(function (card) {
+        var visible = cardMatches(card, appliedFilters);
+        card.hidden = !visible;
+        if (visible) visibleCount++;
       });
-      applyFilters();
+      renderSort();
+      updateResultsMeta(visibleCount);
+    }
+
+    function syncUrl() {
+      var params = new URLSearchParams();
+      if (appliedFilters.area) params.set('area', appliedFilters.area);
+      if (appliedFilters.type) params.set('type', appliedFilters.type);
+      if (appliedFilters.minBeds != null) params.set('beds', String(appliedFilters.minBeds));
+      if (appliedFilters.minBaths != null) params.set('baths', String(appliedFilters.minBaths));
+      if (appliedFilters.min != null) params.set('min', String(appliedFilters.min));
+      if (appliedFilters.max != null) params.set('max', String(appliedFilters.max));
+      if (appliedSort !== 'default') params.set('sort', appliedSort);
+      var query = params.toString();
+      var url = window.location.pathname + (query ? '?' + query : '');
+      window.history.replaceState(null, '', url);
+    }
+
+    function readFiltersFromForm() {
+      return {
+        area: fArea.value,
+        type: fType.value,
+        minBeds: fBedrooms.value ? parseInt(fBedrooms.value, 10) : null,
+        minBaths: fBathrooms.value ? parseInt(fBathrooms.value, 10) : null,
+        min: parsePrice(fMin.value),
+        max: parsePrice(fMax.value),
+      };
+    }
+
+    function runSearch(opts) {
+      if (!validatePriceRange()) return;
+      appliedFilters = readFiltersFromForm();
+      appliedSort = fSort.value;
+      render();
+      syncUrl();
+      if (opts && opts.scrollToResults && window.innerWidth < 760) {
+        var heading = document.querySelector('.results-meta');
+        if (heading) heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    if (filterForm) {
+      filterForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        runSearch({ scrollToResults: true });
+      });
+    }
+
+    // Sort updates the already-applied result set immediately — it does not
+    // require pressing Search Properties again.
+    fSort.addEventListener('change', function () {
+      appliedSort = fSort.value;
+      renderSort();
+      syncUrl();
     });
 
-    // Support deep-linking via query string, e.g. properties.html?location=...
-    var params = new URLSearchParams(window.location.search);
-    if (params.get('location')) fLocation.value = params.get('location');
-    if (params.get('bedrooms')) fBedrooms.value = params.get('bedrooms');
-    applyFilters();
+    resetBtn.addEventListener('click', function () {
+      fArea.value = '';
+      fType.value = '';
+      fBedrooms.value = '';
+      fBathrooms.value = '';
+      fMin.value = '';
+      fMax.value = '';
+      fSort.value = 'default';
+      priceError.hidden = true;
+      appliedFilters = { area: '', type: '', minBeds: null, minBaths: null, min: null, max: null };
+      appliedSort = 'default';
+      render();
+      syncUrl();
+    });
+
+    // Restore filters from the URL (shared/bookmarked/refreshed link) and
+    // apply them immediately so the visible grid matches what was shared.
+    (function restoreFromUrl() {
+      var params = new URLSearchParams(window.location.search);
+      var hasAny = false;
+      if (params.get('area')) {
+        fArea.value = params.get('area');
+        hasAny = true;
+      }
+      if (params.get('type')) {
+        fType.value = params.get('type');
+        hasAny = true;
+      }
+      if (params.get('beds')) {
+        fBedrooms.value = params.get('beds');
+        hasAny = true;
+      }
+      if (params.get('baths')) {
+        fBathrooms.value = params.get('baths');
+        hasAny = true;
+      }
+      if (params.get('min')) {
+        fMin.value = params.get('min');
+        hasAny = true;
+      }
+      if (params.get('max')) {
+        fMax.value = params.get('max');
+        hasAny = true;
+      }
+      if (params.get('sort')) {
+        fSort.value = params.get('sort');
+        hasAny = true;
+      }
+      if (hasAny) {
+        appliedFilters = readFiltersFromForm();
+        appliedSort = fSort.value;
+        render();
+      } else {
+        render();
+      }
+    })();
   }
 
   /* ---------- Gallery lightbox (property detail pages) ---------- */
@@ -183,40 +343,62 @@
   }
 
   /* ---------- Sell With Us form -> WhatsApp handoff ---------- */
+  // If SA Homes 4U hasn't supplied a real WhatsApp number yet, don't send
+  // the enquiry into a fabricated one — fall back to opening Instagram and
+  // tell the visitor why, so the form stays usable either way.
   var sellForm = document.querySelector('[data-role="sell-form"]');
-  if (sellForm && window.__SELL_WHATSAPP__) {
+  var sellNote = document.getElementById('sellFormNote');
+  if (sellForm) {
     sellForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      var data = new FormData(sellForm);
-      var lines = [
-        'Hi SA Homes 4U, I would like to list my property.',
-        'Name: ' + (data.get('name') || ''),
-        'Phone: ' + (data.get('phone') || ''),
-        'Location: ' + (data.get('location') || ''),
-        'Expected price: ' + (data.get('price') || ''),
-        'Details: ' + (data.get('details') || ''),
-      ];
-      var url = 'https://wa.me/' + window.__SELL_WHATSAPP__ + '?text=' + encodeURIComponent(lines.join('\n'));
-      window.open(url, '_blank', 'noopener');
+      if (window.__SELL_WHATSAPP__) {
+        var data = new FormData(sellForm);
+        var lines = [
+          'Hi SA Homes 4U, I would like to list my property.',
+          'Name: ' + (data.get('name') || ''),
+          'Phone: ' + (data.get('phone') || ''),
+          'Location: ' + (data.get('location') || ''),
+          'Expected price: ' + (data.get('price') || ''),
+          'Details: ' + (data.get('details') || ''),
+        ];
+        var url = 'https://wa.me/' + window.__SELL_WHATSAPP__ + '?text=' + encodeURIComponent(lines.join('\n'));
+        window.open(url, '_blank', 'noopener');
+      } else if (window.__INSTAGRAM__) {
+        if (sellNote) {
+          sellNote.textContent = 'Our direct WhatsApp line is being finalised — please message us on Instagram in the meantime; we opened it in a new tab.';
+          sellNote.hidden = false;
+        }
+        window.open(window.__INSTAGRAM__, '_blank', 'noopener');
+      }
     });
   }
 
   /* ---------- Contact form -> mailto handoff ---------- */
-  var contactForm = document.querySelector('.contact-form:not([data-role])');
-  if (contactForm && window.__CONTACT_EMAIL__ && document.getElementById('contactSubmit')) {
+  // Same fallback reasoning as the Sell With Us form above.
+  var contactForm = document.querySelector('[data-role="contact-form"]');
+  var contactNote = document.getElementById('contactFormNote');
+  if (contactForm && document.getElementById('contactSubmit')) {
     contactForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      var data = new FormData(contactForm);
-      var subject = 'Enquiry from ' + (data.get('name') || 'website visitor');
-      var body = [
-        'Name: ' + (data.get('name') || ''),
-        'Email: ' + (data.get('email') || ''),
-        'Property: ' + (data.get('property') || ''),
-        '',
-        data.get('message') || '',
-      ].join('\n');
-      window.location.href =
-        'mailto:' + window.__CONTACT_EMAIL__ + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      if (window.__CONTACT_EMAIL__) {
+        var data = new FormData(contactForm);
+        var subject = 'Enquiry from ' + (data.get('name') || 'website visitor');
+        var body = [
+          'Name: ' + (data.get('name') || ''),
+          'Email: ' + (data.get('email') || ''),
+          'Property: ' + (data.get('property') || ''),
+          '',
+          data.get('message') || '',
+        ].join('\n');
+        window.location.href =
+          'mailto:' + window.__CONTACT_EMAIL__ + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      } else if (window.__INSTAGRAM__) {
+        if (contactNote) {
+          contactNote.textContent = 'Our direct email line is being finalised — please message us on Instagram in the meantime; we opened it in a new tab.';
+          contactNote.hidden = false;
+        }
+        window.open(window.__INSTAGRAM__, '_blank', 'noopener');
+      }
     });
   }
 })();
