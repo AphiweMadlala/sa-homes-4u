@@ -10,9 +10,25 @@
  */
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 
 const ROOT = path.resolve(__dirname, '..');
 const DATA_PATH = path.join(ROOT, 'data', 'properties.json');
+
+// Cache-busting query string for the shared CSS/JS, derived from each
+// file's own content so it changes exactly when the file does — no manual
+// version bump to remember. Without this, a browser (or GitHub Pages'
+// CDN) that already cached an old assets/js/main.js or style.css keeps
+// serving it indefinitely after a deploy, since the URL never changes;
+// every generated page would keep referencing the same
+// "assets/js/main.js" regardless of how many times the file changes
+// underneath it.
+function contentHash(relPath) {
+  const contents = fs.readFileSync(path.join(ROOT, relPath));
+  return crypto.createHash('md5').update(contents).digest('hex').slice(0, 10);
+}
+const CSS_VERSION = contentHash('assets/css/style.css');
+const JS_VERSION = contentHash('assets/js/main.js');
 
 // ---------------------------------------------------------------------------
 // Business contact details.
@@ -225,7 +241,7 @@ function head({ title, description, root, canonical, image, structuredData }) {
 <meta name="description" content="${esc(description)}">
 <link rel="canonical" href="${esc(absUrl || `${root}${canonical}`)}">
 <link rel="icon" href="${root}assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="${root}assets/css/style.css">
+<link rel="stylesheet" href="${root}assets/css/style.css?v=${CSS_VERSION}">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
 <meta property="og:type" content="website">
@@ -351,7 +367,7 @@ ${footer(root)}
 ${floatingCta(root, ctaMode)}
 ${lightbox()}
 ${extraScripts}
-<script src="${root}assets/js/main.js"></script>
+<script src="${root}assets/js/main.js?v=${JS_VERSION}"></script>
 </body>
 </html>`;
 }
@@ -433,7 +449,7 @@ function buildHome() {
   </div>
   <div class="hero__scrim"></div>
   <div class="hero__body">
-    <h1 class="hero__wordmark">SA Homes<span class="accent">4U<sup>TM</sup></span></h1>
+    <h1 class="hero__wordmark">SA Homes<span class="accent">4U</span></h1>
     <p class="hero__tagline">Homes with a point of view</p>
   </div>
   <div class="hero__footer">
