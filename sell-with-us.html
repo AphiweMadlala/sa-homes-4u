@@ -5,11 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sell With Us — SA Homes 4U</title>
 <meta name="description" content="List your home with SA Homes 4U — presentation-led property sales across South Africa.">
-<link rel="canonical" href="sell-with-us.html">
+<link rel="canonical" href="/sell-with-us.html">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="assets/css/style.css">
 <meta property="og:title" content="Sell With Us — SA Homes 4U">
 <meta property="og:description" content="List your home with SA Homes 4U — presentation-led property sales across South Africa.">
 <meta property="og:type" content="website">
+
 </head>
 <body class="">
 <header class="site-header" id="siteHeader">
@@ -33,8 +35,7 @@
     <a href="contact.html">Contact</a>
   </div>
   <div class="nav-overlay__meta">
-    
-    
+    <a href="mailto:sa.houses4u@gmail.com">sa.houses4u@gmail.com</a>
     <a href="https://www.instagram.com/sa_homes4u/" target="_blank" rel="noopener">@sa_homes4u on Instagram</a>
   </div>
 </div>
@@ -72,31 +73,13 @@
       </div>
     </div>
 
-    <form class="contact-form" data-role="sell-form" onsubmit="return false;" data-reveal>
-      <div>
-        <label for="sName">Full Name</label>
-        <input id="sName" type="text" name="name" required>
-      </div>
-      <div>
-        <label for="sPhone">Phone Number</label>
-        <input id="sPhone" type="tel" name="phone" required>
-      </div>
-      <div>
-        <label for="sLocation">Property Location</label>
-        <input id="sLocation" type="text" name="location" required>
-      </div>
-      <div>
-        <label for="sPrice">Expected Asking Price</label>
-        <input id="sPrice" type="text" name="price" placeholder="e.g. R 12 000 000">
-      </div>
-      <div>
-        <label for="sDetails">Tell us about the property</label>
-        <textarea id="sDetails" name="details" placeholder="Bedrooms, property type, what makes it stand out..."></textarea>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block" id="sellSubmit">Submit Enquiry <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></button>
-      <a class="btn btn-outline btn-block" href="https://www.instagram.com/sa_homes4u/" target="_blank" rel="noopener"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg> Or Message on Instagram</a>
-      <p class="form-note" id="sellFormNote" hidden></p>
-    </form>
+    <aside class="enquiry-card" data-reveal>
+      <h3>Ready to list your home?</h3>
+      <p>Send us the location, asking price, and a few photos to start.</p>
+      <a class="btn btn-primary btn-block" data-role="email-enquiry" data-subject="Sell With Us — Property Enquiry" data-body="Hi SA Homes 4U,&#10;&#10;I'd like to list my property with you.&#10;&#10;Name:&#10;Phone:&#10;Location:&#10;Asking price:&#10;About the property:" href="mailto:sa.houses4u@gmail.com?subject=Sell%20With%20Us%20%E2%80%94%20Property%20Enquiry&amp;body=Hi%20SA%20Homes%204U%2C%0A%0AI'd%20like%20to%20list%20my%20property%20with%20you.%0A%0AName%3A%0APhone%3A%0ALocation%3A%0AAsking%20price%3A%0AAbout%20the%20property%3A"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg> Email Us About Your Property</a>
+      <a class="btn btn-outline btn-block" href="https://www.instagram.com/sa_homes4u/" target="_blank" rel="noopener"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg> Contact Us on Instagram</a>
+      <p class="enquiry-card__note">We'll come back to you to discuss photography, presentation, and next steps.</p>
+    </aside>
   </div>
 </section>
 
@@ -105,14 +88,13 @@
     <div class="cta-band" style="border-top:none;">
       <div class="cta-band__row">
         <h2>Let's find<br>your next home.</h2>
-        <a class="btn btn-accent" href="https://www.instagram.com/sa_homes4u/" target="_blank" rel="noopener"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg> Message on Instagram</a>
+        <a class="btn btn-accent" href="mailto:sa.houses4u@gmail.com"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg> Email Us</a>
       </div>
     </div>
     <div class="footer-grid">
-      
       <div class="footer-col">
         <h4>Contact</h4>
-        <p>Reach us on Instagram for now.</p>
+        <a href="mailto:sa.houses4u@gmail.com">sa.houses4u@gmail.com</a>
       </div>
       <div class="footer-col">
         <h4>Follow</h4>
@@ -129,7 +111,6 @@
     <div class="footer-bottom">
       <span>SA Homes 4U — Est. 2020</span>
       <span>Homes with a point of view</span>
-      <span>Property photography &amp; listings sourced from <a href="https://www.instagram.com/sa_homes4u/" target="_blank" rel="noopener">@sa_homes4u</a></span>
     </div>
   </div>
 </footer>
@@ -141,7 +122,7 @@
   <button type="button" class="lightbox__next" id="lightboxNext" aria-label="Next image"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"/></svg></button>
   <div class="lightbox__count" id="lightboxCount"></div>
 </div>
-<script>window.__SELL_WHATSAPP__ = null; window.__INSTAGRAM__ = "https://www.instagram.com/sa_homes4u/";</script>
+
 <script src="assets/js/main.js"></script>
 </body>
 </html>

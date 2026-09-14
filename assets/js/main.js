@@ -342,63 +342,17 @@
     });
   }
 
-  /* ---------- Sell With Us form -> WhatsApp handoff ---------- */
-  // If SA Homes 4U hasn't supplied a real WhatsApp number yet, don't send
-  // the enquiry into a fabricated one — fall back to opening Instagram and
-  // tell the visitor why, so the form stays usable either way.
-  var sellForm = document.querySelector('[data-role="sell-form"]');
-  var sellNote = document.getElementById('sellFormNote');
-  if (sellForm) {
-    sellForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      if (window.__SELL_WHATSAPP__) {
-        var data = new FormData(sellForm);
-        var lines = [
-          'Hi SA Homes 4U, I would like to list my property.',
-          'Name: ' + (data.get('name') || ''),
-          'Phone: ' + (data.get('phone') || ''),
-          'Location: ' + (data.get('location') || ''),
-          'Expected price: ' + (data.get('price') || ''),
-          'Details: ' + (data.get('details') || ''),
-        ];
-        var url = 'https://wa.me/' + window.__SELL_WHATSAPP__ + '?text=' + encodeURIComponent(lines.join('\n'));
-        window.open(url, '_blank', 'noopener');
-      } else if (window.__INSTAGRAM__) {
-        if (sellNote) {
-          sellNote.textContent = 'Our direct WhatsApp line is being finalised — please message us on Instagram in the meantime; we opened it in a new tab.';
-          sellNote.hidden = false;
-        }
-        window.open(window.__INSTAGRAM__, '_blank', 'noopener');
-      }
-    });
-  }
-
-  /* ---------- Contact form -> mailto handoff ---------- */
-  // Same fallback reasoning as the Sell With Us form above.
-  var contactForm = document.querySelector('[data-role="contact-form"]');
-  var contactNote = document.getElementById('contactFormNote');
-  if (contactForm && document.getElementById('contactSubmit')) {
-    contactForm.addEventListener('submit', function (e) {
-      e.preventDefault();
-      if (window.__CONTACT_EMAIL__) {
-        var data = new FormData(contactForm);
-        var subject = 'Enquiry from ' + (data.get('name') || 'website visitor');
-        var body = [
-          'Name: ' + (data.get('name') || ''),
-          'Email: ' + (data.get('email') || ''),
-          'Property: ' + (data.get('property') || ''),
-          '',
-          data.get('message') || '',
-        ].join('\n');
-        window.location.href =
-          'mailto:' + window.__CONTACT_EMAIL__ + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-      } else if (window.__INSTAGRAM__) {
-        if (contactNote) {
-          contactNote.textContent = 'Our direct email line is being finalised — please message us on Instagram in the meantime; we opened it in a new tab.';
-          contactNote.hidden = false;
-        }
-        window.open(window.__INSTAGRAM__, '_blank', 'noopener');
-      }
-    });
-  }
+  /* ---------- Email enquiry links: append the current page URL ---------- */
+  // Each [data-role="email-enquiry"] link already ships a working
+  // mailto: href (subject + body) rendered at build time, so it works with
+  // JS disabled. Here we just enhance it by appending the visitor's actual
+  // page URL to the body — more useful than anything guessable at build
+  // time, and correct on any domain the site ends up hosted on.
+  document.querySelectorAll('[data-role="email-enquiry"]').forEach(function (a) {
+    var subject = a.getAttribute('data-subject') || '';
+    var body = a.getAttribute('data-body') || '';
+    var fullBody = body + (body ? '\n\n' : '') + window.location.href;
+    var email = a.href.replace(/^mailto:/, '').split('?')[0];
+    a.href = 'mailto:' + email + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(fullBody);
+  });
 })();
