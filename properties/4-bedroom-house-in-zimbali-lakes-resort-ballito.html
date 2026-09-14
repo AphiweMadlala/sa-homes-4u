@@ -165,13 +165,16 @@
   </div>
 </footer>
 
-<div class="lightbox" id="lightbox" aria-hidden="true">
+<dialog class="lightbox" id="lightbox">
   <button type="button" class="lightbox__close" id="lightboxClose" aria-label="Close gallery"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-  <button type="button" class="lightbox__prev" id="lightboxPrev" aria-label="Previous image"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 6l-6 6 6 6"/></svg></button>
-  <img id="lightboxImg" src="" alt="">
-  <button type="button" class="lightbox__next" id="lightboxNext" aria-label="Next image"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"/></svg></button>
-  <div class="lightbox__count" id="lightboxCount"></div>
-</div>
+  <div class="lightbox__stage" id="lightboxStage">
+    <button type="button" class="lightbox__prev" id="lightboxPrev" aria-label="Previous image"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <img id="lightboxImg" src="" alt="">
+    <button type="button" class="lightbox__next" id="lightboxNext" aria-label="Next image"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"/></svg></button>
+    <div class="lightbox__count" id="lightboxCount"></div>
+  </div>
+  <div class="lightbox__thumbs" id="lightboxThumbs" aria-label="Image thumbnails"></div>
+</dialog>
 <script>window.__GALLERY__ = ["../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/01.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/02.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/03.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/04.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/05.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/06.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/07.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/08.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/09.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/10.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/11.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/12.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/13.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/14.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/15.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/16.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/17.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/18.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/19.webp","../assets/properties/4-bedroom-house-in-zimbali-lakes-resort-ballito/20.webp"];</script>
 <script src="../assets/js/main.js"></script>
 </body>

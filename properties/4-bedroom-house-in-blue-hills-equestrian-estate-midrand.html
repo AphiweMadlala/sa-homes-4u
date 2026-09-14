@@ -85,21 +85,6 @@
     <h2 class="related-heading">Related Properties</h2>
     <div class="p-grid">
       <article class="p-card" data-reveal>
-  <a href="../properties/4-bedroom-house-in-steyn-city.html" aria-label="View 4 Bedroom House in Steyn City">
-    <img class="p-card__img" src="../assets/properties/4-bedroom-house-in-steyn-city/01.webp" alt="4 Bedroom House in Steyn City" loading="lazy">
-    <div class="p-card__scrim"></div>
-    <div class="p-card__top">
-      <span></span>
-      <span class="p-card__price">R 22 999 000</span>
-    </div>
-    <div class="p-card__body">
-      <div class="p-card__loc"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg> Steyn City</div>
-      <h3 class="p-card__title">4 Bedroom House</h3>
-      <span class="p-card__link">View Property <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
-    </div>
-  </a>
-</article>
-      <article class="p-card" data-reveal>
   <a href="../properties/5-bedroom-house-in-blue-hills-equestrian-estate-midrand.html" aria-label="View 5 Bedroom House in Blue Hills Equestrian Estate, Midrand">
     <img class="p-card__img" src="../assets/properties/5-bedroom-house-in-blue-hills-equestrian-estate-midrand/01.webp" alt="5 Bedroom House in Blue Hills Equestrian Estate, Midrand" loading="lazy">
     <div class="p-card__scrim"></div>
@@ -110,6 +95,21 @@
     <div class="p-card__body">
       <div class="p-card__loc"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg> Blue Hills Equestrian Estate, Midrand</div>
       <h3 class="p-card__title">5 Bedroom House</h3>
+      <span class="p-card__link">View Property <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
+    </div>
+  </a>
+</article>
+      <article class="p-card" data-reveal>
+  <a href="../properties/4-bedroom-house-in-steyn-city.html" aria-label="View 4 Bedroom House in Steyn City">
+    <img class="p-card__img" src="../assets/properties/4-bedroom-house-in-steyn-city/01.webp" alt="4 Bedroom House in Steyn City" loading="lazy">
+    <div class="p-card__scrim"></div>
+    <div class="p-card__top">
+      <span></span>
+      <span class="p-card__price">R 22 999 000</span>
+    </div>
+    <div class="p-card__body">
+      <div class="p-card__loc"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg> Steyn City</div>
+      <h3 class="p-card__title">4 Bedroom House</h3>
       <span class="p-card__link">View Property <svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg></span>
     </div>
   </a>
@@ -165,13 +165,16 @@
   </div>
 </footer>
 
-<div class="lightbox" id="lightbox" aria-hidden="true">
+<dialog class="lightbox" id="lightbox">
   <button type="button" class="lightbox__close" id="lightboxClose" aria-label="Close gallery"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
-  <button type="button" class="lightbox__prev" id="lightboxPrev" aria-label="Previous image"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 6l-6 6 6 6"/></svg></button>
-  <img id="lightboxImg" src="" alt="">
-  <button type="button" class="lightbox__next" id="lightboxNext" aria-label="Next image"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"/></svg></button>
-  <div class="lightbox__count" id="lightboxCount"></div>
-</div>
+  <div class="lightbox__stage" id="lightboxStage">
+    <button type="button" class="lightbox__prev" id="lightboxPrev" aria-label="Previous image"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 6l-6 6 6 6"/></svg></button>
+    <img id="lightboxImg" src="" alt="">
+    <button type="button" class="lightbox__next" id="lightboxNext" aria-label="Next image"><svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"/></svg></button>
+    <div class="lightbox__count" id="lightboxCount"></div>
+  </div>
+  <div class="lightbox__thumbs" id="lightboxThumbs" aria-label="Image thumbnails"></div>
+</dialog>
 <script>window.__GALLERY__ = ["../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/01.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/02.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/03.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/04.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/05.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/06.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/07.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/08.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/09.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/10.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/11.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/12.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/13.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/14.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/15.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/16.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/17.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/18.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/19.webp","../assets/properties/4-bedroom-house-in-blue-hills-equestrian-estate-midrand/20.webp"];</script>
 <script src="../assets/js/main.js"></script>
 </body>
