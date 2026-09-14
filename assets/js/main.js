@@ -11,6 +11,26 @@
   document.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
+  /* ---------- Scroll lock (shared: mobile nav overlay + lightbox) ---------- */
+  // Plain `overflow:hidden` on body is not a reliable scroll lock across
+  // browser engines once a position:fixed overlay is involved on a page
+  // with real scroll height — it can leave the fixed overlay positioned
+  // or painted against the pre-lock document instead of the current
+  // viewport. Freezing body in place with position:fixed at its current
+  // scroll offset (then restoring scroll on unlock) is the standard,
+  // robust alternative.
+  var lockedScrollY = 0;
+  function lockScroll() {
+    lockedScrollY = window.scrollY;
+    document.body.style.top = -lockedScrollY + 'px';
+    document.body.classList.add('menu-open');
+  }
+  function unlockScroll() {
+    document.body.classList.remove('menu-open');
+    document.body.style.top = '';
+    window.scrollTo(0, lockedScrollY);
+  }
+
   /* ---------- Mobile nav overlay ---------- */
   var toggle = document.getElementById('menuToggle');
   var overlay = document.getElementById('navOverlay');
@@ -18,14 +38,15 @@
     toggle.addEventListener('click', function () {
       var open = overlay.classList.toggle('is-open');
       toggle.classList.toggle('is-active', open);
-      document.body.classList.toggle('menu-open', open);
+      if (open) lockScroll();
+      else unlockScroll();
       toggle.setAttribute('aria-expanded', String(open));
     });
     overlay.querySelectorAll('a').forEach(function (a) {
       a.addEventListener('click', function () {
         overlay.classList.remove('is-open');
         toggle.classList.remove('is-active');
-        document.body.classList.remove('menu-open');
+        unlockScroll();
         toggle.setAttribute('aria-expanded', 'false');
       });
     });
@@ -33,7 +54,7 @@
       if (e.key === 'Escape' && overlay.classList.contains('is-open')) {
         overlay.classList.remove('is-open');
         toggle.classList.remove('is-active');
-        document.body.classList.remove('menu-open');
+        unlockScroll();
         toggle.setAttribute('aria-expanded', 'false');
       }
     });
@@ -335,17 +356,34 @@
         activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       }
     }
+    // showModal() puts the <dialog> in the browser's top layer (see the
+    // comment on lightbox() in generate.js) and makes it interactive;
+    // .is-open only drives the opacity fade on top of that. rAF defers
+    // adding the class a frame so the fade actually transitions from 0
+    // instead of starting already at 1.
     function open(index) {
       show(index);
-      lightbox.classList.add('is-open');
-      lightbox.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('menu-open');
+      lightbox.showModal();
+      requestAnimationFrame(function () {
+        lightbox.classList.add('is-open');
+      });
+      lockScroll();
     }
     function close() {
       lightbox.classList.remove('is-open');
-      lightbox.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('menu-open');
+      // Let the fade-out run before actually closing (which removes it from
+      // the top layer immediately) instead of cutting it short.
+      setTimeout(function () {
+        if (lightbox.open) lightbox.close();
+      }, 300);
     }
+    // Fires for every path a <dialog> can close through — our close()
+    // above, or the browser's own native Escape handling — so scroll
+    // unlock always happens exactly once regardless of which triggered it.
+    lightbox.addEventListener('close', function () {
+      lightbox.classList.remove('is-open');
+      unlockScroll();
+    });
 
     galleryEl.querySelectorAll('a[data-index]').forEach(function (a) {
       a.addEventListener('click', function (e) {
@@ -366,9 +404,10 @@
     lightbox.addEventListener('click', function (e) {
       if (e.target === lightbox || e.target === lightboxStage) close();
     });
+    // Escape is handled natively by the dialog itself; only arrow keys
+    // need a listener here.
     document.addEventListener('keydown', function (e) {
-      if (!lightbox.classList.contains('is-open')) return;
-      if (e.key === 'Escape') close();
+      if (!lightbox.open) return;
       if (e.key === 'ArrowLeft') show(current - 1);
       if (e.key === 'ArrowRight') show(current + 1);
     });

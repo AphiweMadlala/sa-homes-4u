@@ -298,8 +298,13 @@ function footer(root) {
 </footer>`;
 }
 
+// A native <dialog>, shown via showModal(), renders in the browser's "top
+// layer" — guaranteed by spec to paint above every other element in the
+// document regardless of z-index or stacking context, unlike a plain
+// position:fixed div. That sidesteps a rendering issue found in testing
+// where a plain fixed div could show page content behind it.
 function lightbox() {
-  return `<div class="lightbox" id="lightbox" aria-hidden="true">
+  return `<dialog class="lightbox" id="lightbox">
   <button type="button" class="lightbox__close" id="lightboxClose" aria-label="Close gallery">${ICONS.close}</button>
   <div class="lightbox__stage" id="lightboxStage">
     <button type="button" class="lightbox__prev" id="lightboxPrev" aria-label="Previous image">${ICONS.chevL}</button>
@@ -308,7 +313,7 @@ function lightbox() {
     <div class="lightbox__count" id="lightboxCount"></div>
   </div>
   <div class="lightbox__thumbs" id="lightboxThumbs" aria-label="Image thumbnails"></div>
-</div>`;
+</dialog>`;
 }
 
 function page({

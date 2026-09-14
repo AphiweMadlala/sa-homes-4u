@@ -301,7 +301,13 @@ body.is-home .site-header.is-scrolled{
 }
 .nav-overlay__meta a:hover{ color: var(--accent-bright); }
 
-body.menu-open{ overflow: hidden; }
+/* Freezing body at its scroll offset via position:fixed (main.js sets
+   `top`) locks scroll far more reliably across engines than plain
+   overflow:hidden — the latter can leave position:fixed overlay children
+   (the lightbox, the nav overlay) painted against the wrong box on a long
+   page. width:100% replaces the shrink-to-content width fixed position
+   would otherwise give the body. */
+body.menu-open{ position: fixed; overflow: hidden; width: 100%; left: 0; right: 0; }
 
 /* ---------- Hero ---------- */
 .hero{
@@ -840,14 +846,27 @@ section.cta-band{
 }
 
 /* Lightbox — a neutral near-black overlay, not the old navy-black. */
+/* <dialog>'s UA stylesheet gives it its own centered/bordered/padded box
+   and a `dialog:not([open]){ display:none }` rule that already handles
+   hiding it when closed — every property below just overrides its shown
+   ([open]) state to be our full-viewport flex column instead. */
 .lightbox{
   position: fixed; inset: 0; z-index: 200;
+  margin: 0; padding: 0; border: none; max-width: none; max-height: none;
+  width: 100%; height: 100%;
   background: rgba(18, 14, 12, 0.96);
-  display: flex; flex-direction: column;
-  opacity: 0; visibility: hidden;
-  transition: opacity .3s var(--ease), visibility .3s;
+  color: inherit;
+  flex-direction: column;
+  opacity: 0;
+  transition: opacity .3s var(--ease);
 }
-.lightbox.is-open{ opacity: 1; visibility: visible; }
+/* A plain `.lightbox{ display:flex }` would outrank the UA stylesheet's
+   base `dialog{ display:none }` (a class always beats a bare type
+   selector) and stay visible/interactive even without [open] — scoping
+   display to the [open] state keeps closed correctly non-rendered. */
+.lightbox[open]{ display: flex; }
+.lightbox.is-open{ opacity: 1; }
+.lightbox::backdrop{ background: transparent; }
 
 /* The image area — everything above the thumbnail filmstrip. flex:1 with
    min-height:0 lets it shrink to whatever's left once the filmstrip takes
