@@ -165,7 +165,11 @@ h1, h2, h3, h4{
   border: 1px solid var(--accent-dim);
 }
 .btn-accent:hover{ background: var(--accent); color: var(--on-dark); border-color: var(--accent); }
-.btn-block{ width: 100%; justify-content: center; }
+/* A block button may carry a longer label than the site's other CTAs (e.g.
+   "Email Us About Your Property"); on a narrow screen there's no room for
+   that on one line, so — unlike inline buttons — let it wrap instead of
+   forcing its grid/flex container wider than the viewport. */
+.btn-block{ width: 100%; justify-content: center; white-space: normal; text-align: center; }
 
 /* ---------- Nav ---------- */
 /* Default (non-home) pages start with a light Limestone body straight under
@@ -870,6 +874,7 @@ section.cta-band{
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: clamp(32px, 5vw, 72px);
+  align-items: start;
 }
 .contact-form{ display: flex; flex-direction: column; gap: 16px; }
 .contact-form label{ font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-faint); display:block; margin-bottom: 8px; }

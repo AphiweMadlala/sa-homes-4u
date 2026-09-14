@@ -868,7 +868,7 @@ function buildContact() {
 
 <section class="section">
   <div class="container">
-    <div class="value-grid" style="grid-template-columns:1fr 1fr;">
+    <div class="value-grid" style="grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));">
       <div class="value-card" data-reveal>
         <span class="eyebrow">Email</span>
         <h3>Email SA Homes 4U</h3>
