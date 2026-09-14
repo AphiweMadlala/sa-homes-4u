@@ -293,18 +293,47 @@
   if (galleryEl && window.__GALLERY__ && window.__GALLERY__.length) {
     var images = window.__GALLERY__;
     var lightbox = document.getElementById('lightbox');
+    var lightboxStage = document.getElementById('lightboxStage');
     var lightboxImg = document.getElementById('lightboxImg');
     var lightboxCount = document.getElementById('lightboxCount');
     var closeBtn = document.getElementById('lightboxClose');
     var prevBtn = document.getElementById('lightboxPrev');
     var nextBtn = document.getElementById('lightboxNext');
+    var thumbsEl = document.getElementById('lightboxThumbs');
     var current = 0;
+
+    // Thumbnail filmstrip: built once from the same image list the
+    // full-size viewer uses, so it's always in sync with no separate
+    // source of truth.
+    var thumbButtons = images.map(function (src, i) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'lightbox__thumb';
+      btn.setAttribute('aria-label', 'View photo ' + (i + 1) + ' of ' + images.length);
+      var img = document.createElement('img');
+      img.src = src;
+      img.alt = '';
+      img.loading = 'lazy';
+      btn.appendChild(img);
+      btn.addEventListener('click', function () {
+        show(i);
+      });
+      thumbsEl.appendChild(btn);
+      return btn;
+    });
 
     function show(index) {
       current = (index + images.length) % images.length;
       lightboxImg.src = images[current];
       lightboxImg.alt = 'Photo ' + (current + 1) + ' of ' + images.length;
       lightboxCount.textContent = current + 1 + ' / ' + images.length;
+      thumbButtons.forEach(function (btn, i) {
+        btn.classList.toggle('is-active', i === current);
+      });
+      var activeThumb = thumbButtons[current];
+      if (activeThumb && activeThumb.scrollIntoView) {
+        activeThumb.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
     }
     function open(index) {
       show(index);
@@ -331,8 +360,11 @@
     nextBtn.addEventListener('click', function () {
       show(current + 1);
     });
+    // Click the dimmed backdrop (outside the image/controls/filmstrip) to
+    // close, same as before — now also covers the stage area around the
+    // image, since that's no longer the same element as the lightbox root.
     lightbox.addEventListener('click', function (e) {
-      if (e.target === lightbox) close();
+      if (e.target === lightbox || e.target === lightboxStage) close();
     });
     document.addEventListener('keydown', function (e) {
       if (!lightbox.classList.contains('is-open')) return;

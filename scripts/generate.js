@@ -119,17 +119,20 @@ function bySlug(slug) {
   return enriched.find((p) => p.slug === slug);
 }
 
+const normalize = (str) => String(str).trim().toLowerCase();
+
+// Location-first, no filler: a home is only "related" if it's actually in
+// the same place. Genuinely unrelated properties (matched only by bedroom
+// count or nearest price, as this used to do) are worse than showing
+// fewer — or zero — related properties.
 function relatedFor(property, count = 3) {
   const pool = enriched.filter((p) => p.slug !== property.slug);
-  const sameArea = pool.filter((p) => p.area === property.area);
-  const sameBedrooms = pool.filter((p) => p.bedrooms === property.bedrooms && p.area !== property.area);
-  const byPriceDistance = [...pool].sort(
-    (a, b) => Math.abs(a.askingPrice - property.askingPrice) - Math.abs(b.askingPrice - property.askingPrice)
-  );
+  const sameLocation = pool.filter((p) => normalize(p.location) === normalize(property.location));
+  const sameArea = pool.filter((p) => normalize(p.area) === normalize(property.area));
 
   const picked = [];
   const seen = new Set();
-  for (const list of [sameArea, sameBedrooms, byPriceDistance]) {
+  for (const list of [sameLocation, sameArea]) {
     for (const p of list) {
       if (picked.length >= count) break;
       if (seen.has(p.slug)) continue;
@@ -137,7 +140,7 @@ function relatedFor(property, count = 3) {
       picked.push(p);
     }
   }
-  return picked.slice(0, count);
+  return picked;
 }
 
 // schema.org JSON-LD for a property detail page. Only known, non-null
@@ -298,10 +301,13 @@ function footer(root) {
 function lightbox() {
   return `<div class="lightbox" id="lightbox" aria-hidden="true">
   <button type="button" class="lightbox__close" id="lightboxClose" aria-label="Close gallery">${ICONS.close}</button>
-  <button type="button" class="lightbox__prev" id="lightboxPrev" aria-label="Previous image">${ICONS.chevL}</button>
-  <img id="lightboxImg" src="" alt="">
-  <button type="button" class="lightbox__next" id="lightboxNext" aria-label="Next image">${ICONS.chevR}</button>
-  <div class="lightbox__count" id="lightboxCount"></div>
+  <div class="lightbox__stage" id="lightboxStage">
+    <button type="button" class="lightbox__prev" id="lightboxPrev" aria-label="Previous image">${ICONS.chevL}</button>
+    <img id="lightboxImg" src="" alt="">
+    <button type="button" class="lightbox__next" id="lightboxNext" aria-label="Next image">${ICONS.chevR}</button>
+    <div class="lightbox__count" id="lightboxCount"></div>
+  </div>
+  <div class="lightbox__thumbs" id="lightboxThumbs" aria-label="Image thumbnails"></div>
 </div>`;
 }
 
@@ -558,14 +564,6 @@ function buildPropertiesPage() {
           <label for="fMax">Maximum Price</label>
           <input type="text" inputmode="numeric" autocomplete="off" id="fMax" placeholder="e.g. R 27 500 000">
         </div>
-        <div class="filter-field">
-          <label for="fSort">Sort By</label>
-          <select id="fSort">
-            <option value="default">Default / Latest</option>
-            <option value="price-asc">Price: Low to High</option>
-            <option value="price-desc">Price: High to Low</option>
-          </select>
-        </div>
       </div>
       <p class="filter-error" id="priceError" role="alert" hidden>Minimum price can&rsquo;t be higher than maximum price.</p>
       <div class="filter-actions">
@@ -576,6 +574,14 @@ function buildPropertiesPage() {
 
     <div class="results-meta">
       <span id="resultsCount">Showing all ${enriched.length} properties</span>
+      <div class="sort-field">
+        <label for="fSort">Sort By</label>
+        <select id="fSort">
+          <option value="default">Default / Latest</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+        </select>
+      </div>
     </div>
 
     <div class="p-grid" id="propertyGrid">
