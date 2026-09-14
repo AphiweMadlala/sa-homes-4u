@@ -16,47 +16,50 @@ const DATA_PATH = path.join(ROOT, 'data', 'properties.json');
 
 // ---------------------------------------------------------------------------
 // Business contact details.
-// SA Homes 4U's own phone/email/WhatsApp number was not present anywhere in
-// the scraped Instagram data (only individual estate agents' numbers appear
-// inside some captions, which belong to third-party agencies, not this
-// business). Rather than publish fabricated contact details, these stay
-// `null` until the real values are supplied — every template below checks
-// `has*()` and falls back to the one channel we know is genuine: Instagram.
-// Fill these in and re-run the generator once SA Homes 4U provides them.
+// SA Homes 4U's two confirmed contact channels: email and Instagram. No
+// phone, WhatsApp or physical address has been supplied, so none is
+// published — every CTA in this file uses one of these two.
 // ---------------------------------------------------------------------------
 const CONFIG = {
-  whatsappNumber: null, // e.g. '27821234567' — no leading +, no spaces
-  phoneDisplay: null, // e.g. '+27 82 123 4567'
-  email: null, // e.g. 'info@sahomes4u.co.za'
-  addressLine1: null, // e.g. 'Suite 4, 12 Main Road, Sea Point'
+  email: 'sa.houses4u@gmail.com',
   instagram: 'https://www.instagram.com/sa_homes4u/',
   instagramHandle: '@sa_homes4u',
   // Production domain the site will be hosted at, no trailing slash, e.g.
   // 'https://www.sahomes4u.co.za'. Not knowable until SA Homes 4U picks a
-  // domain, so — same reasoning as the contact fields above — absolute
-  // canonical/og/twitter URLs and sitemap.xml stay switched off until this
-  // is filled in, rather than being built against a made-up domain.
+  // domain, so absolute canonical/og/twitter URLs and sitemap.xml stay
+  // switched off until this is filled in, rather than being built against
+  // a made-up domain.
   siteUrl: null,
 };
 
-const hasWhatsapp = () => Boolean(CONFIG.whatsappNumber);
-const hasPhone = () => Boolean(CONFIG.phoneDisplay);
-const hasEmail = () => Boolean(CONFIG.email);
-const hasAddress = () => Boolean(CONFIG.addressLine1);
 const hasSiteUrl = () => Boolean(CONFIG.siteUrl);
 
 // Used as the social-preview image for pages that aren't about one specific
 // listing (home, properties, about, sell, contact).
 const DEFAULT_OG_IMAGE = 'assets/properties/5-bedroom-house-in-suiderstrand-western-cape/01.webp';
 
-// The one enquiry channel guaranteed to be real. Every CTA that would
-// otherwise depend on a placeholder phone/email/WhatsApp number falls back
-// to this instead of linking users to fabricated contact details.
-function primaryCta(property) {
-  if (hasWhatsapp()) {
-    return { href: whatsappLink(property), label: 'Message on WhatsApp', icon: ICONS.whatsapp };
-  }
-  return { href: CONFIG.instagram, label: 'Message on Instagram', icon: ICONS.instagram };
+function mailtoHref(subject, body) {
+  const params = [];
+  if (subject) params.push(`subject=${encodeURIComponent(subject)}`);
+  if (body) params.push(`body=${encodeURIComponent(body)}`);
+  return `mailto:${CONFIG.email}${params.length ? '?' + params.join('&') : ''}`;
+}
+
+// A mailto button. When `subject`/`body` are given, the link is also marked
+// `data-role="email-enquiry"` so main.js can append the visitor's current
+// page URL to the body at runtime (see assets/js/main.js) — no backend, no
+// build-time domain required, and the link still works fine without JS.
+function emailButton(label, { subject, body, variant = 'primary', block = true } = {}) {
+  const cls = `btn btn-${variant}${block ? ' btn-block' : ''}`;
+  const dataAttrs = subject || body
+    ? ` data-role="email-enquiry" data-subject="${escAttr(subject || '')}" data-body="${escAttr(body || '')}"`
+    : '';
+  return `<a class="${cls}"${dataAttrs} href="${esc(mailtoHref(subject, body))}">${ICONS.mail} ${label}</a>`;
+}
+
+function instagramButton(label = 'Message on Instagram', { variant = 'outline', block = true } = {}) {
+  const cls = `btn btn-${variant}${block ? ' btn-block' : ''}`;
+  return `<a class="${cls}" href="${CONFIG.instagram}" target="_blank" rel="noopener">${ICONS.instagram} ${label}</a>`;
 }
 
 const properties = JSON.parse(fs.readFileSync(DATA_PATH, 'utf8'));
@@ -77,12 +80,6 @@ function formatPrice(amount) {
   return `R ${grouped}`;
 }
 
-function formatDate(iso) {
-  if (!iso) return null;
-  const d = new Date(iso);
-  return d.toLocaleDateString('en-ZA', { year: 'numeric', month: 'long', day: 'numeric' });
-}
-
 function esc(str) {
   if (str == null) return '';
   return String(str)
@@ -90,6 +87,13 @@ function esc(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+// Same as esc(), but also entity-encodes newlines so a multi-line value
+// (e.g. a mailto body) stays a single, readable line inside an HTML
+// attribute instead of splitting the attribute across raw source lines.
+function escAttr(str) {
+  return esc(str).replace(/\n/g, '&#10;');
 }
 
 // Broad city/suburb/market-area grouping, used for filtering and location
@@ -136,14 +140,6 @@ function relatedFor(property, count = 3) {
   return picked.slice(0, count);
 }
 
-function whatsappLink(property) {
-  if (!hasWhatsapp()) return null;
-  const msg = property
-    ? `Hi SA Homes 4U, I'm interested in ${property.title} (${formatPrice(property.askingPrice)}). Could you tell me more?\n\n${property.canonicalUrl || ''}`
-    : `Hi SA Homes 4U, I'd like to enquire about a property.`;
-  return `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(msg)}`;
-}
-
 // schema.org JSON-LD for a property detail page. Only known, non-null
 // fields are included — same "no invented placeholders" rule as the UI.
 function propertyStructuredData(property) {
@@ -187,7 +183,7 @@ const ICONS = {
   bed: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 18v-7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v7"/><path d="M3 18h18"/><path d="M7 9V6a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v3"/><path d="M13 9V7a1 1 0 0 1 1-1h3a2 2 0 0 1 2 2v1"/></svg>`,
   pin: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>`,
   arrow: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 12h14"/><path d="M13 6l6 6-6 6"/></svg>`,
-  whatsapp: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2c-5.5 0-10 4.5-10 10 0 1.77.47 3.45 1.3 4.9L2 22l5.25-1.38a9.96 9.96 0 0 0 4.79 1.22h.01c5.5 0 10-4.5 10-10s-4.5-9.84-10.01-9.84Zm0 18.2a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.18 8.18 0 0 1-1.26-4.34c0-4.53 3.69-8.22 8.24-8.22 4.54 0 8.22 3.68 8.22 8.22 0 4.53-3.69 8.2-8.23 8.2Zm4.52-6.16c-.25-.12-1.47-.72-1.7-.8-.23-.08-.4-.12-.56.13-.17.25-.65.8-.8.96-.15.17-.29.19-.54.06-.25-.12-1.06-.39-2.02-1.24-.75-.66-1.25-1.48-1.4-1.73-.15-.25-.02-.38.11-.51.11-.11.25-.29.37-.44.12-.15.16-.25.25-.42.08-.17.04-.31-.02-.44-.06-.12-.56-1.35-.77-1.85-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.44.06-.67.31-.23.25-.87.85-.87 2.08s.9 2.41 1.02 2.58c.12.17 1.77 2.7 4.28 3.79.6.26 1.06.41 1.43.53.6.19 1.14.16 1.57.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.15-1.18-.06-.1-.23-.17-.48-.29Z"/></svg>`,
+  mail: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>`,
   close: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M6 6l12 12M18 6 6 18"/></svg>`,
   chevL: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M15 6l-6 6 6 6"/></svg>`,
   chevR: `<svg width="1em" height="1em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M9 6l6 6-6 6"/></svg>`,
@@ -250,8 +246,7 @@ function header(activeHref, root) {
     ${NAV_ITEMS.map((item) => `<a href="${root}${item.href}">${item.label}</a>`).join('\n    ')}
   </div>
   <div class="nav-overlay__meta">
-    ${hasWhatsapp() ? `<a href="${esc(whatsappLink())}" target="_blank" rel="noopener">WhatsApp: ${CONFIG.phoneDisplay}</a>` : ''}
-    ${hasEmail() ? `<a href="mailto:${CONFIG.email}">${CONFIG.email}</a>` : ''}
+    <a href="mailto:${CONFIG.email}">${CONFIG.email}</a>
     <a href="${CONFIG.instagram}" target="_blank" rel="noopener">${CONFIG.instagramHandle} on Instagram</a>
   </div>
 </div>`;
@@ -260,9 +255,8 @@ function header(activeHref, root) {
 function floatingCta(root, mode) {
   if (mode === 'none') return '';
   if (mode === 'enquire') {
-    const cta = primaryCta();
     return `<div class="floating-cta">
-  <a class="btn btn-primary" href="${esc(cta.href)}" target="_blank" rel="noopener">${cta.icon} Enquire Now</a>
+  <a class="btn btn-primary" href="${CONFIG.instagram}" target="_blank" rel="noopener">${ICONS.instagram} Message on Instagram</a>
 </div>`;
   }
   return `<div class="floating-cta">
@@ -271,35 +265,19 @@ function floatingCta(root, mode) {
 }
 
 function footer(root) {
-  const cta = primaryCta();
-  const addressCol = hasAddress()
-    ? `<div class="footer-col">
-        <h4>Address</h4>
-        <p>${esc(CONFIG.addressLine1)}</p>
-        <p>South Africa</p>
-      </div>`
-    : '';
-  const contactLines = [
-    hasPhone() ? `<a href="tel:${CONFIG.phoneDisplay.replace(/\s+/g, '')}">${CONFIG.phoneDisplay}</a>` : '',
-    hasEmail() ? `<a href="mailto:${CONFIG.email}">${CONFIG.email}</a>` : '',
-  ]
-    .filter(Boolean)
-    .join('\n        ');
-  const contactCol = `<div class="footer-col">
-        <h4>Contact</h4>
-        ${contactLines || `<p>Reach us on Instagram for now.</p>`}
-      </div>`;
   return `<footer class="site-footer">
   <div class="container">
     <div class="cta-band" style="border-top:none;">
       <div class="cta-band__row">
         <h2>Let's find<br>your next home.</h2>
-        <a class="btn btn-accent" href="${esc(cta.href)}" target="_blank" rel="noopener">${cta.icon} ${cta.label}</a>
+        <a class="btn btn-accent" href="mailto:${CONFIG.email}">${ICONS.mail} Email Us</a>
       </div>
     </div>
     <div class="footer-grid">
-      ${addressCol}
-      ${contactCol}
+      <div class="footer-col">
+        <h4>Contact</h4>
+        <a href="mailto:${CONFIG.email}">${CONFIG.email}</a>
+      </div>
       <div class="footer-col">
         <h4>Follow</h4>
         <a href="${CONFIG.instagram}" target="_blank" rel="noopener">${CONFIG.instagramHandle}</a>
@@ -312,7 +290,6 @@ function footer(root) {
     <div class="footer-bottom">
       <span>SA Homes 4U — Est. 2020</span>
       <span>Homes with a point of view</span>
-      <span>Property photography &amp; listings sourced from <a href="${CONFIG.instagram}" target="_blank" rel="noopener">${CONFIG.instagramHandle}</a></span>
     </div>
   </div>
 </footer>`;
@@ -599,7 +576,6 @@ function buildPropertiesPage() {
 
     <div class="results-meta">
       <span id="resultsCount">Showing all ${enriched.length} properties</span>
-      <span>Sourced from ${CONFIG.instagramHandle}</span>
     </div>
 
     <div class="p-grid" id="propertyGrid">
@@ -651,9 +627,15 @@ function buildPropertyPage(property) {
   if (property.floorSize != null) specs.push(['Floor Size', property.floorSize]);
   specs.push(['Property Type', property.propertyType]);
 
-  const rateLevy = [];
-  if (property.rates != null) rateLevy.push(`<div class="contact-detail"><dt>Rates</dt><dd>${esc(property.rates)}</dd></div>`);
-  if (property.levies != null) rateLevy.push(`<div class="contact-detail"><dt>Levies</dt><dd>${esc(property.levies)}</dd></div>`);
+  const enquirySubject = `Property Enquiry — ${property.title}`;
+  const enquiryBody = [
+    'Hi SA Homes 4U,',
+    '',
+    "I'd like to enquire about:",
+    property.title,
+    formatPrice(property.askingPrice),
+    property.location,
+  ].join('\n');
 
   const content = `
 <section class="p-hero">
@@ -686,21 +668,13 @@ function buildPropertyPage(property) {
                 .join('')}</div>`
             : ''
         }
-        <p class="p-source">Originally presented on Instagram
-          (<a href="${esc(property.instagramPostUrl)}" target="_blank" rel="noopener">${property.instagramPostDate ? formatDate(property.instagramPostDate) : 'view post'}</a>)
-          &mdash; photography courtesy of ${CONFIG.instagramHandle}.
-        </p>
       </div>
 
       <aside class="enquiry-card">
         <h3>Interested in this home?</h3>
         <p>Speak to the SA Homes 4U team about ${esc(property.title)}.</p>
-        ${(() => {
-          const cta = primaryCta(property);
-          return `<a class="btn btn-primary btn-block" href="${esc(cta.href)}" target="_blank" rel="noopener">${cta.icon} ${cta.label}</a>`;
-        })()}
-        <a class="btn btn-outline btn-block" href="${root}contact.html?property=${encodeURIComponent(property.slug)}">Arrange Viewing</a>
-        ${hasEmail() ? `<a class="btn btn-outline btn-block" href="mailto:${CONFIG.email}?subject=${encodeURIComponent('Enquiry: ' + property.title)}">Contact Agent</a>` : ''}
+        ${emailButton('Enquire by Email', { subject: enquirySubject, body: enquiryBody })}
+        ${instagramButton()}
         <p class="enquiry-card__note">Asking price ${formatPrice(property.askingPrice)}. Figures and specifications shown are as supplied and subject to confirmation.</p>
       </aside>
     </div>
@@ -728,8 +702,8 @@ function buildPropertyPage(property) {
     structuredData: propertyStructuredData(property),
     extraScripts: `<script>window.__GALLERY__ = ${JSON.stringify(images.map((i) => root + i))};</script>`,
     // No floating CTA here: the sticky enquiry sidebar already carries the
-    // primary WhatsApp/viewing/contact actions, and a fixed pill would
-    // visually collide with it while scrolling.
+    // primary email/Instagram actions, and a fixed pill would visually
+    // collide with it while scrolling.
     ctaMode: 'none',
   });
 }
@@ -780,7 +754,7 @@ function buildAbout() {
       <div class="value-card" data-reveal>
         <span class="eyebrow">Access</span>
         <h3>A direct line to the team</h3>
-        <p>Every listing connects straight to a real enquiry ${hasWhatsapp() ? '&mdash; WhatsApp, phone, or email &mdash;' : '&mdash; via Instagram, with more direct channels coming soon &mdash;'} with no unnecessary steps in between.</p>
+        <p>Every listing connects straight to a real enquiry &mdash; by email or Instagram &mdash; with no unnecessary steps in between.</p>
       </div>
     </div>
   </div>
@@ -842,34 +816,26 @@ function buildSell() {
       </div>
     </div>
 
-    <form class="contact-form" data-role="sell-form" onsubmit="return false;" data-reveal>
-      <div>
-        <label for="sName">Full Name</label>
-        <input id="sName" type="text" name="name" required>
-      </div>
-      <div>
-        <label for="sPhone">Phone Number</label>
-        <input id="sPhone" type="tel" name="phone" required>
-      </div>
-      <div>
-        <label for="sLocation">Property Location</label>
-        <input id="sLocation" type="text" name="location" required>
-      </div>
-      <div>
-        <label for="sPrice">Expected Asking Price</label>
-        <input id="sPrice" type="text" name="price" placeholder="e.g. R 12 000 000">
-      </div>
-      <div>
-        <label for="sDetails">Tell us about the property</label>
-        <textarea id="sDetails" name="details" placeholder="Bedrooms, property type, what makes it stand out..."></textarea>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block" id="sellSubmit">Submit Enquiry ${ICONS.arrow}</button>
-      ${(() => {
-        const cta = primaryCta();
-        return `<a class="btn btn-outline btn-block" href="${esc(cta.href)}" target="_blank" rel="noopener">${cta.icon} Or ${cta.label}</a>`;
-      })()}
-      <p class="form-note" id="sellFormNote" hidden></p>
-    </form>
+    <aside class="enquiry-card" data-reveal>
+      <h3>Ready to list your home?</h3>
+      <p>Send us the location, asking price, and a few photos to start.</p>
+      ${emailButton('Email Us About Your Property', {
+        subject: 'Sell With Us — Property Enquiry',
+        body: [
+          'Hi SA Homes 4U,',
+          '',
+          "I'd like to list my property with you.",
+          '',
+          'Name:',
+          'Phone:',
+          'Location:',
+          'Asking price:',
+          'About the property:',
+        ].join('\n'),
+      })}
+      ${instagramButton('Contact Us on Instagram')}
+      <p class="enquiry-card__note">We'll come back to you to discuss photography, presentation, and next steps.</p>
+    </aside>
   </div>
 </section>
 `;
@@ -880,10 +846,8 @@ function buildSell() {
     activeHref: 'sell-with-us.html',
     canonical: 'sell-with-us.html',
     content,
-    extraScripts: `<script>window.__SELL_WHATSAPP__ = ${JSON.stringify(CONFIG.whatsappNumber)}; window.__INSTAGRAM__ = ${JSON.stringify(CONFIG.instagram)};</script>`,
-    // The form's own submit button + direct WhatsApp link already cover
-    // enquiries here, and a fixed pill would overlap the form fields in
-    // this two-column layout.
+    // The enquiry card already carries the primary email/Instagram actions,
+    // and a fixed pill would overlap it in this two-column layout.
     ctaMode: 'none',
   });
 }
@@ -893,21 +857,6 @@ function buildSell() {
 // ---------------------------------------------------------------------------
 function buildContact() {
   const root = '';
-  const cta = primaryCta();
-  const knownDetails = [
-    hasWhatsapp()
-      ? `<div class="contact-detail"><dt>WhatsApp</dt><dd><a href="${esc(whatsappLink())}" target="_blank" rel="noopener">${CONFIG.phoneDisplay}</a></dd></div>`
-      : '',
-    hasPhone()
-      ? `<div class="contact-detail"><dt>Phone</dt><dd><a href="tel:${CONFIG.phoneDisplay.replace(/\s+/g, '')}">${CONFIG.phoneDisplay}</a></dd></div>`
-      : '',
-    hasEmail()
-      ? `<div class="contact-detail"><dt>Email</dt><dd><a href="mailto:${CONFIG.email}">${CONFIG.email}</a></dd></div>`
-      : '',
-  ]
-    .filter(Boolean)
-    .join('\n      ');
-
   const content = `
 <section class="page-hero">
   <div class="container">
@@ -918,37 +867,21 @@ function buildContact() {
 </section>
 
 <section class="section">
-  <div class="container contact-grid">
-    <div data-reveal>
-      ${knownDetails}
-      <div class="contact-detail">
-        <dt>Instagram</dt>
-        <dd><a href="${CONFIG.instagram}" target="_blank" rel="noopener">${CONFIG.instagramHandle}</a></dd>
+  <div class="container">
+    <div class="value-grid" style="grid-template-columns:1fr 1fr;">
+      <div class="value-card" data-reveal>
+        <span class="eyebrow">Email</span>
+        <h3>Email SA Homes 4U</h3>
+        <p>${CONFIG.email}</p>
+        ${emailButton('Email Us', { block: true })}
       </div>
-      ${!hasWhatsapp() && !hasPhone() && !hasEmail() ? `<p class="form-note">Our direct phone and email lines are being finalised &mdash; for now, the fastest way to reach us is Instagram.</p>` : ''}
-      <a class="btn btn-accent" href="${esc(cta.href)}" target="_blank" rel="noopener" style="margin-top:12px;">${cta.icon} ${cta.label}</a>
+      <div class="value-card" data-reveal>
+        <span class="eyebrow">Instagram</span>
+        <h3>${CONFIG.instagramHandle}</h3>
+        <p>Message us directly on Instagram for a fast response.</p>
+        ${instagramButton()}
+      </div>
     </div>
-
-    <form class="contact-form" data-role="contact-form" onsubmit="return false;" data-reveal>
-      <div>
-        <label for="cName">Full Name</label>
-        <input id="cName" type="text" name="name" required>
-      </div>
-      <div>
-        <label for="cEmail">Email</label>
-        <input id="cEmail" type="email" name="email" required>
-      </div>
-      <div>
-        <label for="cProperty">Property (optional)</label>
-        <input id="cProperty" type="text" name="property" placeholder="Which listing are you enquiring about?">
-      </div>
-      <div>
-        <label for="cMessage">Message</label>
-        <textarea id="cMessage" name="message" required></textarea>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block" id="contactSubmit">Send Enquiry ${ICONS.arrow}</button>
-      <p class="form-note" id="contactFormNote" hidden></p>
-    </form>
   </div>
 </section>
 `;
@@ -959,9 +892,8 @@ function buildContact() {
     activeHref: 'contact.html',
     canonical: 'contact.html',
     content,
-    extraScripts: `<script>window.__CONTACT_EMAIL__ = ${JSON.stringify(CONFIG.email)}; window.__INSTAGRAM__ = ${JSON.stringify(CONFIG.instagram)};</script>`,
-    // Same reasoning as Sell With Us: the form + WhatsApp link already
-    // cover enquiries, and a fixed pill would overlap the form column.
+    // The channel cards above already carry the primary email/Instagram
+    // actions, and a fixed pill would be redundant on this page.
     ctaMode: 'none',
   });
 }

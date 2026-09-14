@@ -27,11 +27,13 @@ python3 -m http.server 8000
 
 then open `http://localhost:8000/index.html`.
 
+## Contact channels
+
+`scripts/generate.js`'s `CONFIG` block holds SA Homes 4U's two confirmed contact channels — email (`sa.houses4u@gmail.com`) and Instagram (`@sa_homes4u`) — used everywhere a contact action appears (header, footer, property enquiries, Contact, Sell With Us). No phone number, WhatsApp number, or physical address has been supplied, so none is published; add one to `CONFIG` and wire it into the relevant templates only once SA Homes 4U provides it.
+
 ## Before launch
 
-`scripts/generate.js` has a `CONFIG` block at the top with **placeholder** business contact details (WhatsApp number, phone, email, address) — none of this was present in the source data, so it must be replaced with SA Homes 4U's real contact details before going live. Re-run the generator after editing it.
-
-`CONFIG.siteUrl` is also unset for the same reason: no production domain was known at build time. Until it's filled in (e.g. `'https://www.sahomes4u.co.za'`, no trailing slash), pages use root-relative canonical URLs, `sitemap.xml` isn't generated, and social-preview tags (`og:image`, `og:url`, Twitter card) are omitted rather than built against a fabricated domain. Set it and re-run the generator once the domain is live.
+`CONFIG.siteUrl` is unset because no production domain was known at build time. Until it's filled in (e.g. `'https://www.sahomes4u.co.za'`, no trailing slash), pages use root-relative canonical URLs, `sitemap.xml` isn't generated, and social-preview tags (`og:image`, `og:url`, Twitter card) are omitted rather than built against a fabricated domain. Set it and re-run the generator once the domain is live.
 
 ## Production-readiness housekeeping already in place
 

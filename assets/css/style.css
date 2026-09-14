@@ -788,15 +788,6 @@ section.cta-band{
 .spec-item dt{ font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
 .spec-item dd{ margin: 8px 0 0; font-family: var(--serif); font-size: 1.35rem; color: var(--text); }
 
-.p-source{
-  margin-top: 40px;
-  padding-top: 24px;
-  border-top: 1px solid var(--border-soft);
-  font-size: 0.82rem;
-  color: var(--text-faint);
-}
-.p-source a{ color: var(--accent); border-bottom: 1px solid var(--accent-dim); }
-
 .enquiry-card{
   position: sticky;
   top: 110px;
