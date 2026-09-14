@@ -24,12 +24,13 @@ const CONFIG = {
   email: 'sa.houses4u@gmail.com',
   instagram: 'https://www.instagram.com/sa_homes4u/',
   instagramHandle: '@sa_homes4u',
-  // Production domain the site will be hosted at, no trailing slash, e.g.
-  // 'https://www.sahomes4u.co.za'. Not knowable until SA Homes 4U picks a
-  // domain, so absolute canonical/og/twitter URLs and sitemap.xml stay
-  // switched off until this is filled in, rather than being built against
-  // a made-up domain.
-  siteUrl: null,
+  // Production domain the site is hosted at, no trailing slash. Currently
+  // GitHub Pages project hosting for AphiweMadlala/sa-homes-4u, which
+  // serves from a /sa-homes-4u subpath rather than the domain root —
+  // included here, not just the bare domain, so absolute canonical/og/
+  // JSON-LD URLs and sitemap.xml all resolve correctly. Update this (and
+  // re-run) if SA Homes 4U ever moves to their own domain.
+  siteUrl: 'https://aphiwemadlala.github.io/sa-homes-4u',
 };
 
 const hasSiteUrl = () => Boolean(CONFIG.siteUrl);
@@ -145,8 +146,13 @@ function relatedFor(property, count = 3) {
 
 // schema.org JSON-LD for a property detail page. Only known, non-null
 // fields are included — same "no invented placeholders" rule as the UI.
-function propertyStructuredData(property) {
-  const abs = (p) => (hasSiteUrl() ? `${CONFIG.siteUrl}/${p}` : `/${p}`);
+function propertyStructuredData(property, root) {
+  // Prefer a fully-qualified URL (CONFIG.siteUrl is set); fall back to a
+  // path relative to *this page* via `root`, never a domain-root-absolute
+  // "/…" — that only resolves correctly when the site is hosted at the
+  // domain root, which it isn't under GitHub Pages project hosting (a
+  // /<repo> subpath) or any other subpath deployment.
+  const abs = (p) => (hasSiteUrl() ? `${CONFIG.siteUrl}/${p}` : `${root}${p}`);
   const data = {
     '@context': 'https://schema.org',
     '@type': 'RealEstateListing',
@@ -206,15 +212,18 @@ const NAV_ITEMS = [
 function head({ title, description, root, canonical, image, structuredData }) {
   const absUrl = hasSiteUrl() ? `${CONFIG.siteUrl}/${canonical}` : null;
   const absImage = hasSiteUrl() && image ? `${CONFIG.siteUrl}/${image}` : null;
-  // Root-relative (leading "/"), never bare "properties/x.html": a bare
-  // relative URL resolves against the *document's own* directory, so on a
-  // page already living in /properties/ it would double up to
-  // /properties/properties/x.html instead of /properties/x.html.
+  // Fallback (only reachable if CONFIG.siteUrl were ever unset again) is
+  // `${root}${canonical}` — relative to *this page*, via the same `root`
+  // every asset/nav link already uses — never a bare "properties/x.html"
+  // (which would double up to /properties/properties/x.html from a page
+  // already living in /properties/) and never a domain-root-absolute
+  // "/properties/x.html" (which skips right past a GitHub Pages project
+  // subpath like /sa-homes-4u/ back to the domain root).
   return `<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
-<link rel="canonical" href="${esc(absUrl || `/${canonical}`)}">
+<link rel="canonical" href="${esc(absUrl || `${root}${canonical}`)}">
 <link rel="icon" href="${root}assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="${root}assets/css/style.css">
 <meta property="og:title" content="${esc(title)}">
@@ -710,7 +719,7 @@ function buildPropertyPage(property) {
     canonical: `properties/${property.slug}.html`,
     content,
     image: property.images[0],
-    structuredData: propertyStructuredData(property),
+    structuredData: propertyStructuredData(property, root),
     extraScripts: `<script>window.__GALLERY__ = ${JSON.stringify(images.map((i) => root + i))};</script>`,
     // No floating CTA here: the sticky enquiry sidebar already carries the
     // primary email/Instagram actions, and a fixed pill would visually
