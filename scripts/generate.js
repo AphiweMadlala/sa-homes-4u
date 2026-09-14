@@ -31,12 +31,23 @@ const CONFIG = {
   addressLine1: null, // e.g. 'Suite 4, 12 Main Road, Sea Point'
   instagram: 'https://www.instagram.com/sa_homes4u/',
   instagramHandle: '@sa_homes4u',
+  // Production domain the site will be hosted at, no trailing slash, e.g.
+  // 'https://www.sahomes4u.co.za'. Not knowable until SA Homes 4U picks a
+  // domain, so — same reasoning as the contact fields above — absolute
+  // canonical/og/twitter URLs and sitemap.xml stay switched off until this
+  // is filled in, rather than being built against a made-up domain.
+  siteUrl: null,
 };
 
 const hasWhatsapp = () => Boolean(CONFIG.whatsappNumber);
 const hasPhone = () => Boolean(CONFIG.phoneDisplay);
 const hasEmail = () => Boolean(CONFIG.email);
 const hasAddress = () => Boolean(CONFIG.addressLine1);
+const hasSiteUrl = () => Boolean(CONFIG.siteUrl);
+
+// Used as the social-preview image for pages that aren't about one specific
+// listing (home, properties, about, sell, contact).
+const DEFAULT_OG_IMAGE = 'assets/properties/5-bedroom-house-in-suiderstrand-western-cape/01.webp';
 
 // The one enquiry channel guaranteed to be real. Every CTA that would
 // otherwise depend on a placeholder phone/email/WhatsApp number falls back
@@ -133,6 +144,38 @@ function whatsappLink(property) {
   return `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(msg)}`;
 }
 
+// schema.org JSON-LD for a property detail page. Only known, non-null
+// fields are included — same "no invented placeholders" rule as the UI.
+function propertyStructuredData(property) {
+  const abs = (p) => (hasSiteUrl() ? `${CONFIG.siteUrl}/${p}` : `/${p}`);
+  const data = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateListing',
+    name: property.title,
+    url: abs(`properties/${property.slug}.html`),
+    image: property.images.map(abs),
+    datePosted: property.instagramPostDate || undefined,
+    about: {
+      '@type': 'SingleFamilyResidence',
+      name: property.title,
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: property.area,
+        addressCountry: 'ZA',
+      },
+      numberOfRooms: property.bedrooms ?? undefined,
+      numberOfBathroomsTotal: property.bathrooms ?? undefined,
+    },
+    offers: {
+      '@type': 'Offer',
+      price: property.askingPrice,
+      priceCurrency: property.currency,
+      availability: 'https://schema.org/InStock',
+    },
+  };
+  return JSON.stringify(data);
+}
+
 // ---------------------------------------------------------------------------
 // Icons (inline SVG, no external icon font)
 // ---------------------------------------------------------------------------
@@ -161,16 +204,30 @@ const NAV_ITEMS = [
   { label: 'Contact', href: 'contact.html' },
 ];
 
-function head({ title, description, root, canonical }) {
+function head({ title, description, root, canonical, image, structuredData }) {
+  const absUrl = hasSiteUrl() ? `${CONFIG.siteUrl}/${canonical}` : null;
+  const absImage = hasSiteUrl() && image ? `${CONFIG.siteUrl}/${image}` : null;
+  // Root-relative (leading "/"), never bare "properties/x.html": a bare
+  // relative URL resolves against the *document's own* directory, so on a
+  // page already living in /properties/ it would double up to
+  // /properties/properties/x.html instead of /properties/x.html.
   return `<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
-<link rel="canonical" href="${esc(canonical)}">
+<link rel="canonical" href="${esc(absUrl || `/${canonical}`)}">
+<link rel="icon" href="${root}assets/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="${root}assets/css/style.css">
 <meta property="og:title" content="${esc(title)}">
 <meta property="og:description" content="${esc(description)}">
-<meta property="og:type" content="website">`;
+<meta property="og:type" content="website">
+${absUrl ? `<meta property="og:url" content="${esc(absUrl)}">\n` : ''}${
+    absImage
+      ? `<meta property="og:image" content="${esc(absImage)}">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${esc(absImage)}">`
+      : ''
+  }${structuredData ? `\n<script type="application/ld+json">${structuredData}</script>` : ''}`;
 }
 
 function header(activeHref, root) {
@@ -271,12 +328,24 @@ function lightbox() {
 </div>`;
 }
 
-function page({ title, description, root, activeHref, canonical, bodyClass = '', content, extraScripts = '', ctaMode = 'collection' }) {
+function page({
+  title,
+  description,
+  root,
+  activeHref,
+  canonical,
+  bodyClass = '',
+  content,
+  extraScripts = '',
+  ctaMode = 'collection',
+  image = DEFAULT_OG_IMAGE,
+  structuredData,
+}) {
   const cls = [bodyClass, ctaMode !== 'none' ? 'has-floating-cta' : ''].filter(Boolean).join(' ');
   return `<!doctype html>
 <html lang="en">
 <head>
-${head({ title, description, root, canonical })}
+${head({ title, description, root, canonical, image, structuredData })}
 </head>
 <body class="${cls}">
 ${header(activeHref, root)}
@@ -655,6 +724,8 @@ function buildPropertyPage(property) {
     activeHref: 'properties.html',
     canonical: `properties/${property.slug}.html`,
     content,
+    image: property.images[0],
+    structuredData: propertyStructuredData(property),
     extraScripts: `<script>window.__GALLERY__ = ${JSON.stringify(images.map((i) => root + i))};</script>`,
     // No floating CTA here: the sticky enquiry sidebar already carries the
     // primary WhatsApp/viewing/contact actions, and a fixed pill would
@@ -896,6 +967,60 @@ function buildContact() {
 }
 
 // ---------------------------------------------------------------------------
+// 404 page
+// ---------------------------------------------------------------------------
+function build404() {
+  const root = '';
+  const content = `
+<section class="page-hero">
+  <div class="container">
+    <span class="eyebrow">404</span>
+    <h1>This page has moved on.</h1>
+    <p>The page you're looking for doesn't exist &mdash; it may have been an outdated link, or a listing that's no longer part of the collection.</p>
+    <a class="btn btn-primary" href="properties.html">View Collection ${ICONS.arrow}</a>
+  </div>
+</section>
+`;
+  return page({
+    title: 'Page Not Found — SA Homes 4U',
+    description: 'The page you were looking for could not be found.',
+    root,
+    activeHref: '',
+    canonical: '404.html',
+    content,
+    ctaMode: 'none',
+  });
+}
+
+// ---------------------------------------------------------------------------
+// robots.txt / sitemap.xml
+// ---------------------------------------------------------------------------
+// robots.txt itself needs no domain, so it's always written; the Sitemap:
+// directive (and sitemap.xml itself, whose <loc> entries must be absolute
+// per spec) only make sense once CONFIG.siteUrl is known.
+function buildRobotsTxt() {
+  return `User-agent: *
+Allow: /
+${hasSiteUrl() ? `\nSitemap: ${CONFIG.siteUrl}/sitemap.xml\n` : ''}`;
+}
+
+function buildSitemapXml() {
+  const urls = [
+    'index.html',
+    'properties.html',
+    'about.html',
+    'sell-with-us.html',
+    'contact.html',
+    ...enriched.map((p) => `properties/${p.slug}.html`),
+  ];
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map((u) => `  <url><loc>${esc(`${CONFIG.siteUrl}/${u}`)}</loc></url>`).join('\n')}
+</urlset>
+`;
+}
+
+// ---------------------------------------------------------------------------
 // Write everything
 // ---------------------------------------------------------------------------
 fs.writeFileSync(path.join(ROOT, 'index.html'), buildHome());
@@ -903,6 +1028,13 @@ fs.writeFileSync(path.join(ROOT, 'properties.html'), buildPropertiesPage());
 fs.writeFileSync(path.join(ROOT, 'about.html'), buildAbout());
 fs.writeFileSync(path.join(ROOT, 'sell-with-us.html'), buildSell());
 fs.writeFileSync(path.join(ROOT, 'contact.html'), buildContact());
+fs.writeFileSync(path.join(ROOT, '404.html'), build404());
+fs.writeFileSync(path.join(ROOT, 'robots.txt'), buildRobotsTxt());
+if (hasSiteUrl()) {
+  fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), buildSitemapXml());
+} else {
+  console.warn('CONFIG.siteUrl is not set — skipping sitemap.xml. Set it once the production domain is known and re-run.');
+}
 
 const propsDir = path.join(ROOT, 'properties');
 fs.mkdirSync(propsDir, { recursive: true });
@@ -913,4 +1045,4 @@ for (const property of enriched) {
   fs.writeFileSync(path.join(propsDir, `${property.slug}.html`), buildPropertyPage(property));
 }
 
-console.log(`Generated 5 top-level pages + ${enriched.length} property pages.`);
+console.log(`Generated 5 top-level pages + 404.html + robots.txt + ${enriched.length} property pages.`);
