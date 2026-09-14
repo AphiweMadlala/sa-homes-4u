@@ -31,9 +31,13 @@ then open `http://localhost:8000/index.html`.
 
 `scripts/generate.js`'s `CONFIG` block holds SA Homes 4U's two confirmed contact channels — email (`sa.houses4u@gmail.com`) and Instagram (`@sa_homes4u`) — used everywhere a contact action appears (header, footer, property enquiries, Contact, Sell With Us). No phone number, WhatsApp number, or physical address has been supplied, so none is published; add one to `CONFIG` and wire it into the relevant templates only once SA Homes 4U provides it.
 
-## Before launch
+## Deployment
 
-`CONFIG.siteUrl` is unset because no production domain was known at build time. Until it's filled in (e.g. `'https://www.sahomes4u.co.za'`, no trailing slash), pages use root-relative canonical URLs, `sitemap.xml` isn't generated, and social-preview tags (`og:image`, `og:url`, Twitter card) are omitted rather than built against a fabricated domain. Set it and re-run the generator once the domain is live.
+The site is hosted on GitHub Pages as a **project site** (repo `AphiweMadlala/sa-homes-4u`, not a `<user>.github.io` repo), which serves from a `/sa-homes-4u` subpath rather than the domain root:
+
+**https://aphiwemadlala.github.io/sa-homes-4u/**
+
+`CONFIG.siteUrl` in `scripts/generate.js` is set to that full URL (subpath included), which drives the absolute canonical URLs, `sitemap.xml`, `robots.txt`'s `Sitemap:` line, and social-preview tags (`og:image`, `og:url`, Twitter card). Every other link and asset reference in the generated pages (nav, logo, property cards, images, CSS/JS) is written relative to the page it's on via each template's `root` variable — never a domain-root-absolute `/…` path — specifically so the site works correctly under a subpath like this one. If SA Homes 4U ever moves to their own domain, update `CONFIG.siteUrl` to the new root (no trailing slash, no subpath) and re-run the generator; nothing else needs to change.
 
 ## Production-readiness housekeeping already in place
 
